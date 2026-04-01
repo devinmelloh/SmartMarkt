@@ -1,0 +1,17 @@
+{
+  "name": "smartmarkt-navigator",
+  "version": "1.0.0",
+  "description": "KI-gestützte Indoor-Navigations-App für Supermärkte",
+  "scripts": {
+    "dev": "npx serve public -p 3000 --single",
+    "build": "echo 'Build ready – deploy /public folder'",
+    "preview": "npx serve public -p 8080"
+  },
+  "keywords": ["supermarkt", "indoor-navigation", "bluetooth-beacons", "pwa"],
+  "author": "SmartMarkt Team",
+  "license": "UNLICENSED",
+  "private": true,
+  "devDependencies": {
+    "serve": "^14.2.0"
+  }
+}
