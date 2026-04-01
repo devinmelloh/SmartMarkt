@@ -566,7 +566,6 @@ canvas#mm{display:block;width:100%;height:100%;}
   <!-- KARTE -->
   <div class="cpanel" id="cp-map" style="padding:0;overflow:hidden;position:relative;">
     <div id="mapShell" style="width:100%;height:100%;display:flex;flex-direction:column;overflow:hidden;position:relative;">
-<div id="mapShell">
   <div id="mapTopbar">
     <div class="tb-back" onclick="history.back()">‹</div>
     <div class="tb-info">
@@ -665,8 +664,8 @@ canvas#mm{display:block;width:100%;height:100%;}
   </div>
 
   <button id="navToggle" onclick="toggleNav()">▶ Navigation starten</button>
-</div>
-<div id="toast"></div>
+  <button id="navStepBtn" onclick="manualNextStep()" style="display:none;margin-left:8px;">Nächster Schritt ›</button>
+  </div>
 
 <script>
 (function(){
@@ -771,13 +770,7 @@ const CLICKZONES=[
 // ═══════════════════════════════════════
 // STATE
 // ═══════════════════════════════════════
-let shoppingList=window.parent?.shoppingList||[
-  {name:'Butter 250g',dept:'dairy',done:false},
-  {name:'Vollmilch 3,8%',dept:'dairy',done:false},
-  {name:'Spaghetti 500g',dept:'food',done:false},
-  {name:'Pils Bier 6er',dept:'drinks',done:false},
-  {name:'Äpfel Pink Lady',dept:'produce',done:false},
-];
+let shoppingList=[];
 
 const PLAYER_START={r:14,c:6};
 let playerPos={...PLAYER_START};
@@ -1198,7 +1191,9 @@ function clearRoute(){
 // ═══════════════════════════════════════
 function toggleNav(){
   navActive=!navActive;
-  document.getElementById('navToggle').textContent=navActive?'⏸ Navigation pausieren':'▶ Navigation starten';
+  document.getElementById('navToggle').textContent=navActive?'⏸ Pause':'▶ Navigation starten';
+  const sb=document.getElementById('navStepBtn');
+  if(sb)sb.style.display=navActive?'inline-block':'none';
   if(navActive&&curMode==='map')setMode('live');
 }
 
@@ -1458,7 +1453,7 @@ function setMode(m){
   document.getElementById('liveView').style.display=m==='live'?'block':'none';
   if(m==='live'){
     resizeAisle();updateLiveProgress();
-    if(navActive)startNavSim();
+    // Auto-walk disabled – route only moves on manual step
   }
   if(m==='map')draw();
 }
@@ -1540,6 +1535,19 @@ if(shoppingList.length>0){
 
 window.addPopupDept=addPopupDept;
 window.clearRoute=clearRoute;
+// Export shared constants + state to global scope for Script 2
+window.DEPT=DEPT;
+window.DEPT_ORDER=DEPT_ORDER;
+window.CLICKZONES=CLICKZONES;
+window.MW=MW;window.MH=MH;
+// State getters/setters so Script 2 reads/writes Script 1 state
+Object.defineProperty(window,'curMode',{get:()=>curMode,set:(v)=>{curMode=v;},configurable:true});
+Object.defineProperty(window,'navActive',{get:()=>navActive,set:(v)=>{navActive=v;},configurable:true});
+Object.defineProperty(window,'routeSteps',{get:()=>routeSteps,set:(v)=>{routeSteps=v;},configurable:true});
+Object.defineProperty(window,'routePath',{get:()=>routePath,set:(v)=>{routePath=v;},configurable:true});
+Object.defineProperty(window,'currentStepIdx',{get:()=>currentStepIdx,set:(v)=>{currentStepIdx=v;},configurable:true});
+Object.defineProperty(window,'playerPos',{get:()=>playerPos,set:(v)=>{playerPos=v;},configurable:true});
+Object.defineProperty(window,'shoppingList',{get:()=>shoppingList,set:(v)=>{shoppingList=v;},configurable:true});
 window.focusStep=focusStep;
 window.resetZoom=resetZoom;
 window.setMode=setMode;
@@ -1552,6 +1560,24 @@ window.startAnim=startAnim;
 window.drawMinimap=drawMinimap;
 window.buildRoute=buildRoute;
 window.draw=draw;
+window.setRouteShoppingList=function(l){shoppingList=l;};
+window.manualNextStep=function(){
+  if(!routeSteps.length)return;
+  if(currentStepIdx<routeSteps.length-1){
+    currentStepIdx++;
+    const step=routeSteps[currentStepIdx];
+    if(step?.dest){playerPos={r:step.dest[0],c:step.dest[1]};}
+    renderStepScroll();updateLiveNav();updateLiveProgress();
+    const lt=document.getElementById('locText');if(lt)lt.textContent=step?.name||'–';
+    if(currentStepIdx===routeSteps.length-1){
+      showToast('✅ Ziel erreicht – du bist an der Kasse!');
+      navActive=false;
+      document.getElementById('navToggle').textContent='▶ Navigation starten';
+      const sb=document.getElementById('navStepBtn');if(sb)sb.style.display='none';
+    }
+    draw();
+  }
+};
 })();
 </script>
     </div>
@@ -1755,7 +1781,128 @@ let OFFERS=[
   {id:12,name:'Croissant 4er',dept:'bakery',icon:'🥐',old:2.49,nw:1.79,shelf:'BK2',valid:'Do 03.04.'},
 ];
 
-const PRODUCTS=[
+// ── STORE-SPECIFIC CATALOGS ──
+const STORE_CATALOGS={
+  rewe1:[
+    {n:'REWE Beste Wahl Vollmilch 3,8%',dk:'dairy',s:'B1',i:'🥛'},{n:'ja! Hafermilch 1L',dk:'dairy',s:'B1',i:'🥛'},
+    {n:'REWE Bio Butter 250g',dk:'dairy',s:'B3',i:'🧈'},{n:'REWE Joghurt natur 500g',dk:'dairy',s:'B2',i:'🥛'},
+    {n:'Gouda jung 400g',dk:'dairy',s:'B4',i:'🧀'},{n:'Mozzarella Kugel 125g',dk:'dairy',s:'B4',i:'🧀'},
+    {n:'Kerrygold Butter',dk:'dairy',s:'B3',i:'🧈'},{n:'Skyr Natur',dk:'dairy',s:'B2',i:'🥛'},
+    {n:'Wasser still 6×1,5L',dk:'drinks',s:'A1',i:'💧'},{n:'Cola Zero 6×1,5L',dk:'drinks',s:'A3',i:'🥤'},
+    {n:'Pils Bier 6er Kiste',dk:'drinks',s:'A4',i:'🍺'},{n:'Orangensaft frisch 1L',dk:'drinks',s:'A2',i:'🍊'},
+    {n:'REWE Bio Apfelsaft',dk:'drinks',s:'A2',i:'🍏'},{n:'Monster Energy 500ml',dk:'drinks',s:'A3',i:'⚡'},
+    {n:'Spaghetti No.5 500g',dk:'food',s:'C1',i:'🍝'},{n:'Penne rigate 500g',dk:'food',s:'C1',i:'🍝'},
+    {n:'Basmati Reis 1kg',dk:'food',s:'C3',i:'🍚'},{n:'ja! Zucker 1kg',dk:'food',s:'C4',i:'🍬'},
+    {n:'Lindt Vollmilch Schokolade',dk:'food',s:'C5',i:'🍫'},{n:'Cornflakes 375g',dk:'food',s:'C6',i:'🥣'},
+    {n:'Heinz Ketchup 800ml',dk:'food',s:'C7',i:'🥫'},{n:'Bertolli Olivenöl 500ml',dk:'food',s:'C4',i:'🫙'},
+    {n:'REWE Bio Weizenmehl 1kg',dk:'food',s:'C1',i:'🌾'},{n:'Mutti Tomatenmark',dk:'food',s:'C7',i:'🥫'},
+    {n:'Äpfel Elstar 1kg',dk:'produce',s:'OG1',i:'🍎'},{n:'Bananen Bio 1kg',dk:'produce',s:'OG1',i:'🍌'},
+    {n:'Rispentomaten 500g',dk:'produce',s:'OG2',i:'🍅'},{n:'Salatgurke',dk:'produce',s:'OG2',i:'🥒'},
+    {n:'Karotten 1kg Beutel',dk:'produce',s:'OG3',i:'🥕'},{n:'Rote Paprika',dk:'produce',s:'OG2',i:'🫑'},
+    {n:'Zwiebeln 1kg Netz',dk:'produce',s:'OG4',i:'🧅'},{n:'Babyspinat 100g',dk:'produce',s:'OG3',i:'🥬'},
+    {n:'Brokkoli 500g',dk:'produce',s:'OG3',i:'🥦'},{n:'Zucchini',dk:'produce',s:'OG2',i:'🥬'},
+    {n:'Hähnchenbrustfilet 400g',dk:'meat',s:'FF1',i:'🍗'},{n:'Rinderhackfleisch 500g',dk:'meat',s:'FF1',i:'🥩'},
+    {n:'Lachsfilet 300g',dk:'meat',s:'FF2',i:'🐟'},{n:'Garnelen TK 300g',dk:'meat',s:'FF2',i:'🦐'},
+    {n:'Schweineschnitzel 400g',dk:'meat',s:'FF1',i:'🥩'},{n:'Fischstäbchen 400g',dk:'meat',s:'FF2',i:'🐟'},
+    {n:'Fairy Spülmittel 500ml',dk:'household',s:'D1',i:'🧴'},{n:'Ariel Pods 20er',dk:'household',s:'D2',i:'🫧'},
+    {n:'Head & Shoulders 400ml',dk:'household',s:'D3',i:'🧴'},{n:'Colgate Zahnpasta',dk:'household',s:'D4',i:'🪥'},
+    {n:'Zewa Küchenpapier 3er',dk:'household',s:'D5',i:'🧻'},{n:'Domestos WC Reiniger',dk:'household',s:'D1',i:'🧹'},
+    {n:'REWE Sauerteigbrot 750g',dk:'bakery',s:'BK1',i:'🍞'},{n:'Croissant 4er',dk:'bakery',s:'BK2',i:'🥐'},
+    {n:'Laugenbrezel 3er',dk:'bakery',s:'BK2',i:'🥨'},{n:'Baguette 250g',dk:'bakery',s:'BK1',i:'🥖'},
+    {n:'TK-Pizza Margherita',dk:'freezer',s:'TK1',i:'🍕'},{n:'TK-Erbsen 750g',dk:'freezer',s:'TK2',i:'🫛'},
+    {n:'Langnese Eis 500ml',dk:'freezer',s:'TK3',i:'🍦'},{n:'McCain Pommes 750g',dk:'freezer',s:'TK2',i:'🍟'},
+  ],
+  rewe2:[
+    {n:'Vollmilch 3,8% 1L',dk:'dairy',s:'B1',i:'🥛'},{n:'Hafermilch Barista',dk:'dairy',s:'B1',i:'🥛'},
+    {n:'Butter 250g',dk:'dairy',s:'B3',i:'🧈'},{n:'Griechischer Joghurt',dk:'dairy',s:'B2',i:'🥛'},
+    {n:'Edamer Scheiben 200g',dk:'dairy',s:'B4',i:'🧀'},{n:'Sahne 30% 200ml',dk:'dairy',s:'B2',i:'🥛'},
+    {n:'Wasser still 1,5L',dk:'drinks',s:'A1',i:'💧'},{n:'Cola 1,5L',dk:'drinks',s:'A3',i:'🥤'},
+    {n:'Radler 6er',dk:'drinks',s:'A4',i:'🍺'},{n:'Multivitaminsaft 1L',dk:'drinks',s:'A2',i:'🍊'},
+    {n:'Spaghetti 500g',dk:'food',s:'C1',i:'🍝'},{n:'Jasmin Reis 1kg',dk:'food',s:'C3',i:'🍚'},
+    {n:'Nutella 450g',dk:'food',s:'C5',i:'🍫'},{n:'Müsli 500g',dk:'food',s:'C6',i:'🥣'},
+    {n:'Äpfel 1kg',dk:'produce',s:'OG1',i:'🍎'},{n:'Bananen 1kg',dk:'produce',s:'OG1',i:'🍌'},
+    {n:'Tomaten 500g',dk:'produce',s:'OG2',i:'🍅'},{n:'Gurke',dk:'produce',s:'OG2',i:'🥒'},
+    {n:'Hähnchenbrust 400g',dk:'meat',s:'FF1',i:'🍗'},{n:'Hackfleisch gemischt 500g',dk:'meat',s:'FF1',i:'🥩'},
+    {n:'Spülmittel 500ml',dk:'household',s:'D1',i:'🧴'},{n:'Waschmittel 1,5kg',dk:'household',s:'D2',i:'🫧'},
+    {n:'Mischbrot 750g',dk:'bakery',s:'BK1',i:'🍞'},{n:'Brötchen 6er',dk:'bakery',s:'BK2',i:'🫓'},
+    {n:'TK-Pizza 4-Käse',dk:'freezer',s:'TK1',i:'🍕'},{n:'TK-Spinat 750g',dk:'freezer',s:'TK2',i:'🥬'},
+  ],
+  lidl1:[
+    {n:'Milbona Vollmilch 3,5%',dk:'dairy',s:'B1',i:'🥛'},{n:'Milbona Hafermilch',dk:'dairy',s:'B1',i:'🥛'},
+    {n:'Milbona Butter 250g',dk:'dairy',s:'B3',i:'🧈'},{n:'Milbona Joghurt 500g',dk:'dairy',s:'B2',i:'🥛'},
+    {n:'Milbona Gouda 400g',dk:'dairy',s:'B4',i:'🧀'},{n:'Milbona Mozzarella',dk:'dairy',s:'B4',i:'🧀'},
+    {n:'Saskia Wasser still 1,5L',dk:'drinks',s:'A1',i:'💧'},{n:'Freeway Cola 1,5L',dk:'drinks',s:'A3',i:'🥤'},
+    {n:'Perlenbacher Pils 6er',dk:'drinks',s:'A4',i:'🍺'},{n:'Solevita Orangensaft 1L',dk:'drinks',s:'A2',i:'🍊'},
+    {n:'Freeway Energydrink',dk:'drinks',s:'A3',i:'⚡'},{n:'Solevita Apfelsaft',dk:'drinks',s:'A2',i:'🍏'},
+    {n:'Combino Spaghetti 500g',dk:'food',s:'C1',i:'🍝'},{n:'Combino Penne 500g',dk:'food',s:'C1',i:'🍝'},
+    {n:'Golden Sun Basmati Reis 1kg',dk:'food',s:'C3',i:'🍚'},{n:'Süßer Schnee Zucker 1kg',dk:'food',s:'C4',i:'🍬'},
+    {n:'Fin Carré Vollmilch',dk:'food',s:'C5',i:'🍫'},{n:'Harvest Basket Cornflakes',dk:'food',s:'C6',i:'🥣'},
+    {n:'Sweet Garden Ketchup',dk:'food',s:'C7',i:'🥫'},{n:'Primadonna Olivenöl',dk:'food',s:'C4',i:'🫙'},
+    {n:'Luppo Weizenmehl 1kg',dk:'food',s:'C1',i:'🌾'},{n:'Italiamo Tomatenmark',dk:'food',s:'C7',i:'🥫'},
+    {n:'Äpfel Gala 1kg',dk:'produce',s:'OG1',i:'🍎'},{n:'Bananen 1kg',dk:'produce',s:'OG1',i:'🍌'},
+    {n:'Rispentomaten 500g',dk:'produce',s:'OG2',i:'🍅'},{n:'Salatgurke',dk:'produce',s:'OG2',i:'🥒'},
+    {n:'Karotten 1kg',dk:'produce',s:'OG3',i:'🥕'},{n:'Paprika Mix 3er',dk:'produce',s:'OG2',i:'🫑'},
+    {n:'Zwiebeln 2kg Netz',dk:'produce',s:'OG4',i:'🧅'},{n:'Eisbergsalat',dk:'produce',s:'OG3',i:'🥬'},
+    {n:'Hähnchenbrustfilet 400g',dk:'meat',s:'FF1',i:'🍗'},{n:'Rinderhackfleisch 400g',dk:'meat',s:'FF1',i:'🥩'},
+    {n:'Lachsfilet 250g',dk:'meat',s:'FF2',i:'🐟'},{n:'Putengeschnetzeltes 400g',dk:'meat',s:'FF1',i:'🍗'},
+    {n:'Wurst Aufschnitt Mix 200g',dk:'meat',s:'FF1',i:'🥩'},{n:'Pangasiusfilet TK',dk:'meat',s:'FF2',i:'🐟'},
+    {n:'Denkmit Spülmittel 500ml',dk:'household',s:'D1',i:'🧴'},{n:'W5 Waschmittel 20 WL',dk:'household',s:'D2',i:'🫧'},
+    {n:'Cien Shampoo 300ml',dk:'household',s:'D3',i:'🧴'},{n:'Dontodent Zahnpasta',dk:'household',s:'D4',i:'🪥'},
+    {n:'Formil Color Pods',dk:'household',s:'D2',i:'🫧'},{n:'Somat Tabs 40er',dk:'household',s:'D1',i:'🧹'},
+    {n:'Backbauern Sauerteigbrot',dk:'bakery',s:'BK1',i:'🍞'},{n:'Crusty Croissant 4er',dk:'bakery',s:'BK2',i:'🥐'},
+    {n:'Laugenbrezel 3er',dk:'bakery',s:'BK2',i:'🥨'},{n:'Baguette',dk:'bakery',s:'BK1',i:'🥖'},
+    {n:'Trattoria Alfredo TK-Pizza',dk:'freezer',s:'TK1',i:'🍕'},{n:'TK-Erbsen 750g',dk:'freezer',s:'TK2',i:'🫛'},
+    {n:'Gelatelli Eis 900ml',dk:'freezer',s:'TK3',i:'🍦'},{n:'Harvest Basket Pommes 750g',dk:'freezer',s:'TK2',i:'🍟'},
+    {n:'TK-Lachs Portion',dk:'freezer',s:'TK2',i:'🐟'},{n:'TK-Spinat 750g',dk:'freezer',s:'TK2',i:'🥬'},
+  ],
+  aldi1:[
+    {n:'MILSANI Vollmilch 3,5%',dk:'dairy',s:'B1',i:'🥛'},{n:'MILSANI Hafermilch',dk:'dairy',s:'B1',i:'🥛'},
+    {n:'MILSANI Butter 250g',dk:'dairy',s:'B3',i:'🧈'},{n:'MILSANI Joghurt natur',dk:'dairy',s:'B2',i:'🥛'},
+    {n:'Gouda Scheiben 400g',dk:'dairy',s:'B4',i:'🧀'},{n:'MILSANI Sahne',dk:'dairy',s:'B2',i:'🥛'},
+    {n:'BÄRENMARKE Langlebige Milch',dk:'dairy',s:'B1',i:'🥛'},
+    {n:'AQUA CULINARIS Wasser 1,5L',dk:'drinks',s:'A1',i:'💧'},{n:'COCA-COLA Zero 1,5L',dk:'drinks',s:'A3',i:'🥤'},
+    {n:'LÜBZER Pils 6er',dk:'drinks',s:'A4',i:'🍺'},{n:'HOHES C Orangensaft 1L',dk:'drinks',s:'A2',i:'🍊'},
+    {n:'Spaghetti 500g',dk:'food',s:'C1',i:'🍝'},{n:'Basmati Reis 1kg',dk:'food',s:'C3',i:'🍚'},
+    {n:'CHOCEUR Vollmilch',dk:'food',s:'C5',i:'🍫'},{n:'HARVEST Müsli 500g',dk:'food',s:'C6',i:'🥣'},
+    {n:'Äpfel 1kg',dk:'produce',s:'OG1',i:'🍎'},{n:'Bananen 1kg',dk:'produce',s:'OG1',i:'🍌'},
+    {n:'Hähnchenbrust 400g',dk:'meat',s:'FF1',i:'🍗'},{n:'Hackfleisch 500g',dk:'meat',s:'FF1',i:'🥩'},
+    {n:'TANDIL Spülmittel',dk:'household',s:'D1',i:'🧴'},{n:'TANDIL Waschmittel',dk:'household',s:'D2',i:'🫧'},
+    {n:'Mischbrot 750g',dk:'bakery',s:'BK1',i:'🍞'},{n:'Brötchen 5er',dk:'bakery',s:'BK2',i:'🫓'},
+    {n:'TK-Pizza 4-Käse',dk:'freezer',s:'TK1',i:'🍕'},{n:'FRENZEL Pommes 750g',dk:'freezer',s:'TK2',i:'🍟'},
+  ],
+  edeka1:[
+    {n:'EDEKA Vollmilch 3,8%',dk:'dairy',s:'B1',i:'🥛'},{n:'EDEKA Hafermilch',dk:'dairy',s:'B1',i:'🥛'},
+    {n:'EDEKA Bio Butter 250g',dk:'dairy',s:'B3',i:'🧈'},{n:'EDEKA Joghurt natur',dk:'dairy',s:'B2',i:'🥛'},
+    {n:'EDEKA Gouda jung',dk:'dairy',s:'B4',i:'🧀'},{n:'Bresse Bleu Käse',dk:'dairy',s:'B4',i:'🧀'},
+    {n:'Crème fraîche 200g',dk:'dairy',s:'B2',i:'🥛'},{n:'Mascarpone 250g',dk:'dairy',s:'B3',i:'🧀'},
+    {n:'EDEKA Wasser still 6×1,5L',dk:'drinks',s:'A1',i:'💧'},{n:'Cola Zero 1,5L',dk:'drinks',s:'A3',i:'🥤'},
+    {n:'Craftbeer IPA 6er',dk:'drinks',s:'A4',i:'🍺'},{n:'EDEKA Bio Orangensaft',dk:'drinks',s:'A2',i:'🍊'},
+    {n:'EDEKA Bio Apfelsaft',dk:'drinks',s:'A2',i:'🍏'},{n:'Rotwein Chianti 0,75L',dk:'drinks',s:'A5',i:'🍷'},
+    {n:'Weißwein Grauburgunder',dk:'drinks',s:'A5',i:'🥂'},{n:'Spaghetti No.5 500g',dk:'food',s:'C1',i:'🍝'},
+    {n:'Linguine 500g',dk:'food',s:'C1',i:'🍝'},{n:'EDEKA Bio Basmati Reis',dk:'food',s:'C3',i:'🍚'},
+    {n:'Rohrzucker 500g',dk:'food',s:'C4',i:'🍬'},{n:'Ritter Sport Vollmilch',dk:'food',s:'C5',i:'🍫'},
+    {n:'EDEKA Bio Müsli',dk:'food',s:'C6',i:'🥣'},{n:'Heinz Ketchup 800ml',dk:'food',s:'C7',i:'🥫'},
+    {n:'EDEKA Bio Olivenöl',dk:'food',s:'C4',i:'🫙'},{n:'EDEKA Bio Mehl 1kg',dk:'food',s:'C1',i:'🌾'},
+    {n:'Äpfel Braeburn 1kg',dk:'produce',s:'OG1',i:'🍎'},{n:'EDEKA Bio Bananen',dk:'produce',s:'OG1',i:'🍌'},
+    {n:'Cocktailtomaten 250g',dk:'produce',s:'OG2',i:'🍅'},{n:'Salatgurke Bio',dk:'produce',s:'OG2',i:'🥒'},
+    {n:'Karotten Bio 1kg',dk:'produce',s:'OG3',i:'🥕'},{n:'Paprika gelb',dk:'produce',s:'OG2',i:'🫑'},
+    {n:'Rote Zwiebeln 500g',dk:'produce',s:'OG4',i:'🧅'},{n:'EDEKA Bio Babyspinat',dk:'produce',s:'OG3',i:'🥬'},
+    {n:'Mango',dk:'produce',s:'OG3',i:'🥭'},{n:'Avocado',dk:'produce',s:'OG3',i:'🥑'},
+    {n:'Hähnchenbrustfilet Bio',dk:'meat',s:'FF1',i:'🍗'},{n:'Rinderhackfleisch 500g',dk:'meat',s:'FF1',i:'🥩'},
+    {n:'Wildlachsfilet 250g',dk:'meat',s:'FF2',i:'🐟'},{n:'Garnelen frisch 250g',dk:'meat',s:'FF2',i:'🦐'},
+    {n:'Schweinefilet 400g',dk:'meat',s:'FF1',i:'🥩'},{n:'Roastbeef 300g',dk:'meat',s:'FF1',i:'🥩'},
+    {n:'Fairy Spülmittel',dk:'household',s:'D1',i:'🧴'},{n:'Ariel Pods 30er',dk:'household',s:'D2',i:'🫧'},
+    {n:'Pantene Shampoo 400ml',dk:'household',s:'D3',i:'🧴'},{n:'Oral-B Zahnpasta',dk:'household',s:'D4',i:'🪥'},
+    {n:'Finish Tabs 40er',dk:'household',s:'D1',i:'🧹'},{n:'EDEKA Bio Sauerteigbrot',dk:'bakery',s:'BK1',i:'🍞'},
+    {n:'Butter-Croissant 4er',dk:'bakery',s:'BK2',i:'🥐'},{n:'Laugenbrezel 3er',dk:'bakery',s:'BK2',i:'🥨'},
+    {n:'Ciabatta 300g',dk:'bakery',s:'BK1',i:'🥖'},{n:'TK-Pizza Mozzarella',dk:'freezer',s:'TK1',i:'🍕'},
+    {n:'TK-Gemüsemix 750g',dk:'freezer',s:'TK2',i:'🫛'},{n:'Häagen-Dazs Eis',dk:'freezer',s:'TK3',i:'🍦'},
+    {n:'TK-Pommes 750g',dk:'freezer',s:'TK2',i:'🍟'},{n:'TK-Lachs Portion',dk:'freezer',s:'TK2',i:'🐟'},
+  ],
+};
+
+// Active products based on selected store (falls back to base PRODUCTS)
+let PRODUCTS=[
   {n:'Vollmilch 3,8%',dk:'dairy',s:'B1',i:'🥛'},{n:'Hafermilch',dk:'dairy',s:'B1',i:'🥛'},
   {n:'Butter 250g',dk:'dairy',s:'B3',i:'🧈'},{n:'Joghurt natur',dk:'dairy',s:'B2',i:'🥛'},
   {n:'Gouda jung',dk:'dairy',s:'B4',i:'🧀'},{n:'Mozzarella',dk:'dairy',s:'B4',i:'🧀'},
@@ -1800,7 +1947,7 @@ let myRecipes=[];
 let curRTab='internet';
 
 // ── SHOPPING LIST ──
-let shoppingList=[];
+// shoppingList lives in Script 1, accessed via window.shoppingList
 
 // ═══════════════════════════════════════════
 // NAVIGATION
@@ -1838,6 +1985,13 @@ function pickStore(id){
   document.getElementById('cStoreName').textContent=selectedStore.name;
   document.getElementById('cStoreAddr').textContent=selectedStore.addr;
   const _msn=document.getElementById('mapStoreName');if(_msn)_msn.textContent=selectedStore.name+' – Lageplan';
+  // Load store-specific product catalog
+  if(STORE_CATALOGS[id]){
+    PRODUCTS.length=0;
+    STORE_CATALOGS[id].forEach(p=>PRODUCTS.push(p));
+  }
+  bizProds=[...PRODUCTS];
+  shoppingList=[];updateBadge();
   showScreen('custApp');
   switchCTab('offers');
 }
@@ -1944,7 +2098,7 @@ function initCustMap_OLD(){
   };
 }
 
-function drawCustMap_OLD(cv){
+function drawCustMap(cv){
   const ctx=cv.getContext('2d');
   const W=cv.width,H=cv.height;
   const cs=Math.min((W-4)/MW,(H-4)/MH);
@@ -2092,7 +2246,7 @@ function searchEnter(){
 
 function renderSrCats(){
   document.getElementById('srCats').innerHTML=Object.entries(DEPT).map(([k,d])=>`
-    <div class="srcat" onclick="setOfferCat('${k}');switchCTab('offers')">
+    <div class="srcat" onclick="openDeptModal('${k}')"  >
       <div class="srcat-ico">${d.icon}</div>
       <div><div class="srcat-name">${d.name}</div><div class="srcat-count">${PRODUCTS.filter(p=>p.dk===k).length} Artikel</div></div>
     </div>`).join('');
@@ -2147,14 +2301,6 @@ function addListItem(){
 function openRouteModal(){
   const open=shoppingList.filter(i=>!i.done);
   if(!open.length){showToast('🛒 Keine offenen Artikel auf der Liste');return;}
-  // Switch to map tab and start route
-  switchCTab('map');
-  setTimeout(()=>{
-    if(typeof shoppingList!=='undefined') {
-      window.startRouteFromList && window.startRouteFromList(open);
-    }
-  }, 200);
-  return;
   // Group by dept, sort by dept order
   const grouped={};
   open.forEach(item=>{if(!grouped[item.dept])grouped[item.dept]=[];grouped[item.dept].push(item);});
@@ -2171,7 +2317,6 @@ function openRouteModal(){
   });
   steps.push({type:'end',ico:'🏁',name:'Kasse',shelf:'Kassenbereich – Ausgang',num:stepNum});
   const totalM=Math.round(steps.length*4.5);
-
   document.getElementById('modalBody').innerHTML=`
     <div class="mo-handle"></div>
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
@@ -2194,6 +2339,9 @@ function openRouteModal(){
 function startNav(){
   closeModal();
   switchCTab('map');
+  setTimeout(()=>{
+    window.startRouteFromList && window.startRouteFromList(shoppingList.filter(i=>!i.done));
+  },200);
   showToast('🧭 Navigation gestartet – folge den Pins auf der Karte');
 }
 
@@ -2609,27 +2757,13 @@ function smoothPath(path){
   }
   o.push(path[path.length-1]);return o;
 }
-
-// Clickable zones on map
-const CLICKZONES=[
-  {r1:1,r2:2,c1:2,c2:4,dk:'produce'},{r1:1,r2:2,c1:6,c2:9,dk:'meat'},{r1:1,r2:2,c1:11,c2:12,dk:'bakery'},
-  {r1:4,r2:10,c1:2,c2:3,dk:'drinks'},{r1:4,r2:10,c1:5,c2:6,dk:'dairy'},
-  {r1:4,r2:10,c1:8,c2:9,dk:'food'},{r1:4,r2:10,c1:11,c2:12,dk:'household'},
-  {r1:4,r2:10,c1:14,c2:15,dk:'freezer'},
-];
-
 // ═══════════════════════════════════════
 // STATE
 // ═══════════════════════════════════════
-let playerPos={...PLAYER_START};
-let routePath=null;   // full A* path
-let routeSteps=[];    // array of stop objects
-let currentStepIdx=0;
-let navActive=false;
+// Script 2 local state (Script 1 state accessed via window.*)
 let playerAnimPos={r:14,c:6};  // smooth animated position
 let pulsePhase=0;
 let dashOffset=0;
-let curMode='map';
 let popupDeptKey=null;
 
 // Camera/zoom
@@ -3058,8 +3192,28 @@ function clearRoute(){
 // ═══════════════════════════════════════
 function toggleNav(){
   navActive=!navActive;
-  document.getElementById('navToggle').textContent=navActive?'⏸ Navigation pausieren':'▶ Navigation starten';
+  document.getElementById('navToggle').textContent=navActive?'⏸ Pause':'▶ Navigation starten';
+  const sb=document.getElementById('navStepBtn');
+  if(sb)sb.style.display=navActive?'inline-block':'none';
   if(navActive&&curMode==='map')setMode('live');
+}
+
+function manualNextStep(){
+  if(!routeSteps.length)return;
+  if(currentStepIdx<routeSteps.length-1){
+    currentStepIdx++;
+    const step=routeSteps[currentStepIdx];
+    if(step?.dest){playerPos={r:step.dest[0],c:step.dest[1]};}
+    renderStepScroll();updateLiveNav();updateLiveProgress();
+    const lt=document.getElementById('locText');if(lt)lt.textContent=step?.name||'–';
+    if(currentStepIdx===routeSteps.length-1){
+      showToast('✅ Ziel erreicht – du bist an der Kasse!');
+      navActive=false;
+      document.getElementById('navToggle').textContent='▶ Navigation starten';
+      const sb=document.getElementById('navStepBtn');if(sb)sb.style.display='none';
+    }
+    draw();
+  }
 }
 
 // Simulate moving to next step (for demo)
@@ -3318,7 +3472,7 @@ function setMode(m){
   document.getElementById('liveView').style.display=m==='live'?'block':'none';
   if(m==='live'){
     resizeAisle();updateLiveProgress();
-    if(navActive)startNavSim();
+    // Auto-walk disabled – route follows physical movement
   }
   if(m==='map')draw();
 }
@@ -3368,7 +3522,9 @@ function addPopupDept(){
 // EXTERNAL INTERFACE
 // ═══════════════════════════════════════
 window.startRouteFromList=function(list){
-  shoppingList=list;buildRoute();
+  shoppingList=list;
+  if(window.setRouteShoppingList)window.setRouteShoppingList(list);
+  if(window.buildRoute)window.buildRoute();
 };
 
 window.addEventListener('resize',()=>{
