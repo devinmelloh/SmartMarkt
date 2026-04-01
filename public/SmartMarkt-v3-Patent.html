@@ -1,0 +1,1641 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="theme-color" content="#080B11">
+<title>SmartMarkt</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#080B11; --s1:#0F141E; --s2:#161E2D; --s3:#1E2A3D;
+  --bdr:rgba(255,255,255,0.06); --bdr2:rgba(255,255,255,0.11); --bdr3:rgba(255,255,255,0.18);
+  --t1:#EEF2FF; --t2:#7B8BA8; --t3:#3D4D66;
+  --g:#00D4AA; --g2:#00A882; --gbg:rgba(0,212,170,0.1); --gbdr:rgba(0,212,170,0.3);
+  --bl:#4A9EFF; --blbg:rgba(74,158,255,0.1); --bldark:#2563EB;
+  --am:#F5A623; --ambg:rgba(245,166,35,0.1);
+  --rd:#FF5C5C; --rdbg:rgba(255,92,92,0.1);
+  --yw:#FFD700;
+  --r:14px; --rsm:9px; --rxs:6px;
+  --f:'DM Sans',-apple-system,sans-serif; --mono:'DM Mono',monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-family:var(--f);color:var(--t1);}
+button,input,select,textarea{font-family:var(--f);}
+button{cursor:pointer;border:none;background:none;color:inherit;}
+
+/* ── APP SHELL ── */
+#app{display:flex;flex-direction:column;height:100dvh;max-width:430px;margin:0 auto;overflow:hidden;position:relative;}
+
+/* ── TOP BAR ── */
+#topbar{
+  flex-shrink:0;
+  padding:max(env(safe-area-inset-top),16px) 16px 13px;
+  background:var(--bg);
+  border-bottom:1px solid var(--bdr);
+  display:flex;align-items:center;gap:11px;
+  position:relative;z-index:20;
+}
+.logo{
+  width:36px;height:36px;background:var(--g);border-radius:10px;
+  display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;
+}
+.tb-mid{flex:1;min-width:0;}
+.tb-title{font-size:15px;font-weight:600;letter-spacing:-.3px;}
+.tb-sub{display:flex;align-items:center;gap:5px;margin-top:2px;}
+.zone-dot{width:6px;height:6px;border-radius:50%;background:var(--g);animation:zdot 2s infinite;}
+@keyframes zdot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.65)}}
+.tb-zone{font-size:11px;color:var(--t2);}
+.tb-right{display:flex;gap:6px;flex-shrink:0;}
+.tbbtn{
+  width:34px;height:34px;background:var(--s2);border-radius:10px;
+  display:flex;align-items:center;justify-content:center;font-size:15px;
+  position:relative;cursor:pointer;border:1px solid var(--bdr);
+  transition:background .15s;
+}
+.tbbtn:active{background:var(--s3);}
+.ibadge{
+  position:absolute;top:-4px;right:-4px;
+  background:var(--rd);color:#fff;font-size:8px;font-weight:700;
+  width:15px;height:15px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  border:1.5px solid var(--bg);
+}
+.ibadge.green{background:var(--g);color:#000;}
+
+/* ── RUSH HOUR BAR ── */
+#stoßbar{
+  flex-shrink:0;
+  background:var(--s1);border-bottom:1px solid var(--bdr);
+  padding:7px 16px;display:flex;align-items:center;gap:10px;
+}
+.sz-label{font-size:11px;font-weight:500;color:var(--t2);flex-shrink:0;}
+.sz-track{flex:1;height:5px;background:var(--s3);border-radius:3px;overflow:hidden;}
+.sz-fill{height:100%;border-radius:3px;transition:width 1s ease,background 1s ease;}
+.sz-val{font-size:11px;font-weight:600;font-family:var(--mono);flex-shrink:0;min-width:36px;text-align:right;}
+.sz-time{font-size:10px;color:var(--t3);flex-shrink:0;}
+.sz-avoid{
+  font-size:10px;font-weight:600;padding:2px 7px;border-radius:10px;
+  background:var(--rdbg);color:var(--rd);border:1px solid rgba(255,92,92,.2);
+  flex-shrink:0;cursor:pointer;
+}
+
+/* ── SEARCH ── */
+#searchbar{flex-shrink:0;padding:10px 16px 0;background:var(--bg);}
+.sb{display:flex;align-items:center;gap:8px;background:var(--s2);border:1px solid var(--bdr2);border-radius:var(--r);padding:9px 12px;transition:border-color .15s;}
+.sb.focus{border-color:var(--g);}
+.sb-ico{font-size:14px;color:var(--t3);}
+.sb input{flex:1;background:none;border:none;outline:none;font-size:14px;color:var(--t1);}
+.sb input::placeholder{color:var(--t3);}
+.sb-x{font-size:13px;color:var(--t3);padding:3px 5px;cursor:pointer;}
+.sb-mic{font-size:15px;color:var(--t2);padding:3px 5px;cursor:pointer;}
+
+/* SEARCH RESULTS */
+#searchResults{
+  position:absolute;top:100%;left:16px;right:16px;z-index:40;
+  background:var(--s2);border:1px solid var(--bdr2);border-radius:var(--r);
+  overflow:hidden;display:none;max-height:220px;overflow-y:auto;
+  box-shadow:0 12px 40px rgba(0,0,0,.5);
+}
+#searchResults.show{display:block;}
+.sr-item{padding:10px 13px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--bdr);cursor:pointer;transition:background .1s;}
+.sr-item:last-child{border-bottom:none;}
+.sr-item:hover,.sr-item:active{background:var(--s3);}
+.sr-ico{font-size:18px;flex-shrink:0;}
+.sr-info{flex:1;min-width:0;}
+.sr-name{font-size:13px;font-weight:500;}
+.sr-dept{font-size:11px;color:var(--t2);}
+.sr-add{font-size:11px;color:var(--g);border:1px solid var(--gbdr);border-radius:6px;padding:3px 8px;flex-shrink:0;}
+
+/* ── CHIPS ── */
+#chips{flex-shrink:0;display:flex;gap:6px;padding:9px 16px;overflow-x:auto;scrollbar-width:none;background:var(--bg);}
+#chips::-webkit-scrollbar{display:none;}
+.chip{flex-shrink:0;padding:5px 12px;border-radius:20px;font-size:12px;font-weight:500;background:var(--s2);border:1px solid var(--bdr);color:var(--t2);white-space:nowrap;cursor:pointer;transition:all .15s;}
+.chip.on{background:var(--gbg);border-color:var(--g);color:var(--g);}
+.chip:active{opacity:.7;}
+
+/* ── MAP ── */
+#mapwrap{flex:1;position:relative;overflow:hidden;min-height:0;background:#050709;}
+canvas#map{display:block;width:100%;height:100%;touch-action:none;cursor:grab;}
+canvas#map:active{cursor:grabbing;}
+
+/* map HUD */
+.hud{position:absolute;pointer-events:none;}
+#zonelbl{
+  top:10px;left:50%;transform:translateX(-50%);
+  background:rgba(8,11,17,.88);backdrop-filter:blur(10px);
+  border:1px solid var(--bdr2);border-radius:20px;
+  padding:5px 14px;font-size:12px;font-weight:500;white-space:nowrap;
+}
+#zbtns{top:10px;right:10px;display:flex;flex-direction:column;gap:5px;pointer-events:all;}
+.zbtn{width:34px;height:34px;background:rgba(8,11,17,.88);backdrop-filter:blur(10px);border:1px solid var(--bdr2);border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:17px;color:var(--t1);cursor:pointer;transition:background .1s;}
+.zbtn:active{background:var(--s3);}
+
+/* Legend */
+#legend{bottom:0;left:10px;display:flex;flex-direction:column;gap:4px;padding-bottom:4px;}
+.leg{display:flex;align-items:center;gap:5px;font-size:10px;color:rgba(255,255,255,.55);}
+.leg-dot{width:9px;height:9px;border-radius:2px;flex-shrink:0;}
+
+/* ── ROUTE STEPS BAR ── */
+#routebar{
+  bottom:0;left:0;right:0;
+  background:rgba(8,11,17,.95);backdrop-filter:blur(14px);
+  border-top:1px solid var(--bdr2);
+  padding:10px 14px 10px;
+  display:none;flex-direction:column;gap:0;
+  pointer-events:all;
+}
+#routebar.show{display:flex;}
+.rb-header{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
+.rb-ico{width:32px;height:32px;background:var(--gbg);border:1px solid var(--gbdr);border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
+.rb-title{font-size:13px;font-weight:600;flex:1;}
+.rb-dist{font-size:11px;color:var(--g);font-weight:600;font-family:var(--mono);margin-right:4px;}
+.rb-x{font-size:16px;color:var(--t3);cursor:pointer;padding:4px;pointer-events:all;}
+
+/* Step scrolling row */
+#stepscroll{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px;}
+#stepscroll::-webkit-scrollbar{display:none;}
+.step{flex-shrink:0;background:var(--s2);border:1px solid var(--bdr);border-radius:9px;padding:6px 10px;display:flex;align-items:center;gap:6px;}
+.step.active{background:var(--gbg);border-color:var(--gbdr);}
+.step.done{opacity:.45;}
+.step.warn{background:var(--rdbg);border-color:rgba(255,92,92,.3);}
+.step-ico{font-size:14px;flex-shrink:0;}
+.step-info{min-width:0;}
+.step-name{font-size:11px;font-weight:600;white-space:nowrap;}
+.step.active .step-name{color:var(--g);}
+.step-dist{font-size:10px;color:var(--t2);margin-top:1px;}
+
+/* ── BOTTOM SHEET ── */
+#sheet{
+  flex-shrink:0;
+  background:var(--s1);border-top:1px solid var(--bdr2);border-radius:18px 18px 0 0;
+  overflow:hidden;display:flex;flex-direction:column;
+  max-height:240px;transition:max-height .3s cubic-bezier(.4,0,.2,1);
+}
+#sheet.open{max-height:500px;}
+.sh-handle-row{flex-shrink:0;display:flex;align-items:center;padding:10px 14px 0;gap:10px;cursor:pointer;user-select:none;}
+.sh-handle{width:32px;height:4px;background:var(--bdr2);border-radius:2px;flex-shrink:0;}
+.sh-tabs{flex:1;display:flex;gap:3px;}
+.stab{flex:1;padding:5px 2px;border-radius:7px;font-size:11px;font-weight:500;color:var(--t2);text-align:center;cursor:pointer;transition:all .15s;}
+.stab.on{background:var(--gbg);color:var(--g);}
+#shbody{flex:1;overflow-y:auto;padding:10px 14px 14px;min-height:0;}
+#shbody::-webkit-scrollbar{display:none;}
+
+/* List items */
+.sli{display:flex;align-items:center;gap:9px;padding:8px 0;border-bottom:1px solid var(--bdr);}
+.sli:last-child{border-bottom:none;}
+.sli.nearby{background:var(--gbg);margin:0 -14px;padding:8px 14px;border-radius:var(--rsm);border-bottom-color:transparent;margin-bottom:3px;}
+.sli.warn-sz{background:var(--rdbg);margin:0 -14px;padding:8px 14px;border-radius:var(--rsm);border-bottom-color:transparent;margin-bottom:3px;}
+.sli-num{width:18px;height:18px;border-radius:50%;background:var(--s3);font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-family:var(--mono);}
+.sli.active-step .sli-num{background:var(--g);color:#000;}
+.sli-cb{width:21px;height:21px;border:1.5px solid var(--t3);border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:10px;cursor:pointer;transition:all .15s;}
+.sli.done .sli-cb{background:var(--g);border-color:var(--g);color:#000;}
+.sli.nearby .sli-cb{border-color:var(--g);}
+.sli-body{flex:1;min-width:0;}
+.sli-name{font-size:13px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.sli.done .sli-name{text-decoration:line-through;color:var(--t3);}
+.sli-sub{font-size:10px;color:var(--t2);margin-top:1px;}
+.sli-pill{font-size:9px;font-weight:700;padding:2px 6px;border-radius:8px;flex-shrink:0;}
+.pill-here{background:var(--g);color:#000;}
+.pill-warn{background:var(--rd);color:#fff;}
+.sli-nav{font-size:10px;color:var(--g);border:1px solid var(--gbdr);border-radius:5px;padding:2px 7px;cursor:pointer;flex-shrink:0;}
+
+.add-row{display:flex;gap:7px;padding-top:10px;}
+.add-inp{flex:1;background:var(--s2);border:1px solid var(--bdr2);border-radius:var(--rsm);padding:8px 11px;font-size:13px;color:var(--t1);outline:none;}
+.add-inp:focus{border-color:var(--g);}
+.add-btn{background:var(--g);color:#000;border-radius:var(--rsm);padding:8px 14px;font-size:18px;font-weight:700;}
+
+/* Recommendations */
+.rec-head{font-size:11px;font-weight:600;color:var(--t2);margin-bottom:7px;display:flex;align-items:center;gap:5px;}
+.rec-grid{display:flex;gap:7px;overflow-x:auto;scrollbar-width:none;padding-bottom:3px;}
+.rec-grid::-webkit-scrollbar{display:none;}
+.rec-card{flex-shrink:0;width:120px;background:var(--s2);border:1px solid var(--bdr);border-radius:var(--r);padding:10px;cursor:pointer;transition:all .15s;}
+.rec-card:active{opacity:.7;transform:scale(.97);}
+.rc-ico{font-size:22px;margin-bottom:5px;}
+.rc-name{font-size:12px;font-weight:500;line-height:1.3;}
+.rc-shelf{font-size:10px;color:var(--t2);margin-top:2px;}
+.rc-badge{font-size:9px;font-weight:600;margin-top:4px;padding:2px 6px;border-radius:8px;display:inline-block;}
+.rc-badge.onroute{background:var(--gbg);color:var(--g);}
+.rc-badge.deal{background:var(--ambg);color:var(--am);}
+.rc-add{font-size:10px;color:var(--g);margin-top:5px;cursor:pointer;}
+
+/* Stoßzeiten tab */
+.sz-row{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--bdr);}
+.sz-row:last-child{border-bottom:none;}
+.sz-name{flex:1;font-size:13px;}
+.sz-bar{width:80px;height:6px;background:var(--s3);border-radius:3px;overflow:hidden;}
+.sz-bfill{height:100%;border-radius:3px;transition:width 1s,background 1s;}
+.sz-pct{font-size:11px;font-weight:600;font-family:var(--mono);min-width:32px;text-align:right;}
+
+/* Alerts tab */
+.notif{background:var(--s2);border:1px solid var(--bdr);border-radius:var(--r);padding:11px;margin-bottom:7px;display:flex;gap:9px;animation:nfin .3s ease;}
+@keyframes nfin{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.notif.green{border-left:3px solid var(--g);}
+.notif.amber{border-left:3px solid var(--am);}
+.notif.blue{border-left:3px solid var(--bl);}
+.notif.red{border-left:3px solid var(--rd);}
+.n-ico{font-size:19px;flex-shrink:0;margin-top:1px;}
+.n-body{flex:1;min-width:0;}
+.n-title{font-size:12px;font-weight:600;}
+.n-txt{font-size:11px;color:var(--t2);margin-top:2px;line-height:1.4;}
+.n-acts{display:flex;gap:5px;margin-top:7px;flex-wrap:wrap;}
+.nact{font-size:11px;font-weight:500;padding:4px 10px;border-radius:14px;border:1px solid;cursor:pointer;}
+.nact.a{background:var(--g);color:#000;border-color:var(--g);}
+.nact.b{color:var(--g);border-color:var(--gbdr);}
+.nact.c{background:var(--am);color:#000;border-color:var(--am);}
+.nact.d{background:var(--rd);color:#fff;border-color:var(--rd);}
+.n-x{font-size:13px;color:var(--t3);cursor:pointer;padding:2px;flex-shrink:0;}
+
+/* Dept grid */
+.dgrid{display:grid;grid-template-columns:1fr 1fr;gap:7px;}
+.dc{background:var(--s2);border:1px solid var(--bdr);border-radius:var(--r);padding:11px;cursor:pointer;transition:all .15s;position:relative;overflow:hidden;}
+.dc:active{opacity:.7;transform:scale(.97);}
+.dc-ico{font-size:23px;margin-bottom:5px;}
+.dc-name{font-size:12px;font-weight:600;}
+.dc-zone{font-size:10px;color:var(--t2);margin-top:2px;}
+.dc-sz{position:absolute;top:8px;right:8px;width:8px;height:8px;border-radius:50%;}
+
+/* ── OVERLAY ── */
+#overlay{position:fixed;inset:0;background:rgba(0,0,0,.65);backdrop-filter:blur(5px);z-index:60;display:none;align-items:flex-end;justify-content:center;}
+#overlay.show{display:flex;}
+.ovcard{background:var(--s1);border-radius:22px 22px 0 0;width:100%;max-width:430px;padding:18px 18px max(env(safe-area-inset-bottom),22px);animation:sup .3s cubic-bezier(.34,1.1,.64,1);}
+@keyframes sup{from{transform:translateY(100%)}to{transform:none}}
+.ov-hnd{width:32px;height:4px;background:var(--bdr2);border-radius:2px;margin:0 auto 16px;}
+.ov-head{display:flex;align-items:center;gap:12px;margin-bottom:14px;}
+.ov-ico{width:48px;height:48px;border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:26px;flex-shrink:0;}
+.ov-title{font-size:17px;font-weight:700;letter-spacing:-.3px;}
+.ov-sub{font-size:12px;color:var(--t2);margin-top:2px;}
+.ov-prods{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:14px;}
+.ovp{background:var(--s2);border-radius:var(--rsm);padding:9px;border:1px solid var(--bdr);}
+.ovp-name{font-size:12px;font-weight:500;}
+.ovp-shelf{font-size:10px;color:var(--t2);margin-top:2px;}
+.ovp-onroute{font-size:9px;color:var(--g);margin-top:3px;}
+.ovp-add{font-size:10px;color:var(--g);font-weight:500;margin-top:5px;cursor:pointer;display:flex;align-items:center;gap:3px;}
+.ov-close{width:100%;background:var(--s2);color:var(--t1);border-radius:var(--rsm);padding:12px;font-size:14px;font-weight:500;border:1px solid var(--bdr);}
+
+/* Recipe modal */
+#recipeModal{position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(5px);z-index:70;display:none;align-items:center;justify-content:center;padding:20px;}
+#recipeModal.show{display:flex;}
+.rm-card{background:var(--s1);border-radius:18px;width:100%;max-width:390px;padding:20px;border:1px solid var(--bdr2);}
+.rm-title{font-size:16px;font-weight:700;margin-bottom:12px;}
+.rm-textarea{width:100%;background:var(--s2);border:1px solid var(--bdr2);border-radius:var(--rsm);padding:10px;font-size:13px;color:var(--t1);outline:none;resize:none;height:100px;font-family:var(--f);}
+.rm-btns{display:flex;gap:8px;margin-top:12px;}
+.rm-import{flex:1;background:var(--g);color:#000;border-radius:var(--rsm);padding:11px;font-size:14px;font-weight:600;}
+.rm-cancel{background:var(--s2);color:var(--t1);border-radius:var(--rsm);padding:11px 16px;font-size:14px;border:1px solid var(--bdr);}
+
+/* ── TOAST ── */
+#toast{position:absolute;top:0;left:0;right:0;z-index:99;padding:0 14px;pointer-events:none;}
+.ti{background:var(--s3);border:1px solid var(--bdr2);border-radius:var(--r);padding:10px 14px;margin-top:7px;font-size:13px;font-weight:500;display:flex;align-items:center;gap:8px;box-shadow:0 10px 40px rgba(0,0,0,.5);animation:tin .25s ease,tout .25s ease 2.7s forwards;}
+@keyframes tin{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:none}}
+@keyframes tout{to{opacity:0;transform:translateY(-10px)}}
+
+/* Voice indicator */
+#voiceind{position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(4px);z-index:80;display:none;align-items:center;justify-content:center;flex-direction:column;gap:16px;}
+#voiceind.show{display:flex;}
+.vi-ring{width:80px;height:80px;border-radius:50%;background:var(--rdbg);border:3px solid var(--rd);display:flex;align-items:center;justify-content:center;font-size:36px;animation:viring 1s infinite;}
+@keyframes viring{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
+.vi-txt{font-size:14px;font-weight:500;color:var(--t2);}
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="toast"></div>
+
+  <!-- TOP BAR -->
+  <div id="topbar">
+    <div class="logo">🛒</div>
+    <div class="tb-mid">
+      <div class="tb-title">SmartMarkt</div>
+      <div class="tb-sub">
+        <div class="zone-dot"></div>
+        <div class="tb-zone" id="zoneTxt">Eingang</div>
+      </div>
+    </div>
+    <div class="tb-right">
+      <div class="tbbtn" onclick="openRecipe()" title="Rezept importieren">🍽️</div>
+      <div class="tbbtn" onclick="switchTab(null,'alerts')" id="bellbtn">🔔<div class="ibadge" id="alertBadge" style="display:none">!</div></div>
+      <div class="tbbtn" id="cartbtn">🛒<div class="ibadge green" id="cartBadge">3</div></div>
+    </div>
+  </div>
+
+  <!-- RUSH HOUR BAR -->
+  <div id="stoßbar">
+    <span class="sz-label">Stoßzeit</span>
+    <div class="sz-track"><div class="sz-fill" id="szFill" style="width:45%;background:var(--am)"></div></div>
+    <span class="sz-val" id="szVal">45%</span>
+    <span class="sz-time" id="szTime">12:30</span>
+    <div class="sz-avoid" onclick="switchTab(null,'stoßzeiten')">Anzeigen</div>
+  </div>
+
+  <!-- SEARCH -->
+  <div id="searchbar" style="position:relative;">
+    <div class="sb" id="sbbox">
+      <span class="sb-ico">🔍</span>
+      <input id="sinput" type="text" placeholder="Produkt suchen..."
+        autocomplete="off"
+        onfocus="document.getElementById('sbbox').classList.add('focus')"
+        onblur="setTimeout(()=>{document.getElementById('sbbox').classList.remove('focus');closeResults()},200)"
+        oninput="onSearch(this.value)"
+        onkeydown="if(event.key==='Enter')searchEnter()">
+      <span class="sb-mic" onclick="startVoice()">🎙️</span>
+      <span class="sb-x" onclick="clearSearch()">✕</span>
+    </div>
+    <div id="searchResults"></div>
+  </div>
+
+  <!-- CHIPS -->
+  <div id="chips">
+    <div class="chip on" onclick="chipClick(this,'all')">Alle Artikel</div>
+    <div class="chip" onclick="chipClick(this,'route')">🧭 Route</div>
+    <div class="chip" onclick="chipClick(this,'drinks')">🍺 Getränke</div>
+    <div class="chip" onclick="chipClick(this,'dairy')">🥛 Molkerei</div>
+    <div class="chip" onclick="chipClick(this,'food')">🍝 Lebensmittel</div>
+    <div class="chip" onclick="chipClick(this,'produce')">🍎 Obst & Gemüse</div>
+    <div class="chip" onclick="chipClick(this,'household')">🧴 Haushalt</div>
+  </div>
+
+  <!-- MAP -->
+  <div id="mapwrap">
+    <canvas id="map"></canvas>
+    <div class="hud" id="zonelbl">Eingang</div>
+    <div class="hud" id="zbtns">
+      <div class="zbtn" onclick="zm(1.25)">+</div>
+      <div class="zbtn" onclick="zm(0.8)">−</div>
+      <div class="zbtn" onclick="resetView()" style="font-size:12px;font-weight:700;">⌂</div>
+    </div>
+    <div class="hud" id="legend">
+      <div class="leg"><div class="leg-dot" style="background:rgba(255,92,92,.7)"></div>Stark belegt</div>
+      <div class="leg"><div class="leg-dot" style="background:rgba(245,166,35,.7)"></div>Mäßig belegt</div>
+      <div class="leg"><div class="leg-dot" style="background:rgba(0,212,170,.7)"></div>Frei</div>
+    </div>
+    <div class="hud" id="routebar">
+      <div class="rb-header">
+        <div class="rb-ico">🧭</div>
+        <div class="rb-title" id="rbTitle">Optimierte Route</div>
+        <div class="rb-dist" id="rbDist">–</div>
+        <div class="rb-x" onclick="clearRoute()">✕</div>
+      </div>
+      <div id="stepscroll"></div>
+    </div>
+  </div>
+
+  <!-- BOTTOM SHEET -->
+  <div id="sheet">
+    <div class="sh-handle-row" onclick="toggleSheet()">
+      <div class="sh-handle"></div>
+      <div class="sh-tabs">
+        <div class="stab on" data-tab="list" onclick="switchTab(event,this.dataset.tab)">📋 Liste</div>
+        <div class="stab" data-tab="recs" onclick="switchTab(event,this.dataset.tab)">💡 Empfehlungen</div>
+        <div class="stab" data-tab="stoßzeiten" onclick="switchTab(event,this.dataset.tab)">📊 Stoßzeiten</div>
+        <div class="stab" data-tab="depts" onclick="switchTab(event,this.dataset.tab)">🏪 Abteilungen</div>
+        <div class="stab" data-tab="alerts" onclick="switchTab(event,this.dataset.tab)">🔔 Hinweise</div>
+      </div>
+    </div>
+    <div id="shbody"></div>
+  </div>
+</div>
+
+<!-- DEPT OVERLAY -->
+<div id="overlay" onclick="overlayBg(event)">
+  <div class="ovcard" id="ovcard">
+    <div class="ov-hnd"></div>
+    <div class="ov-head">
+      <div class="ov-ico" id="ovIco"></div>
+      <div><div class="ov-title" id="ovTitle"></div><div class="ov-sub" id="ovSub"></div></div>
+    </div>
+    <div class="ov-prods" id="ovProds"></div>
+    <button class="ov-close" onclick="closeOverlay()">Schließen</button>
+  </div>
+</div>
+
+<!-- RECIPE MODAL -->
+<div id="recipeModal" onclick="if(event.target===this)closeRecipe()">
+  <div class="rm-card">
+    <div class="rm-title">🍽️ Rezept importieren</div>
+    <textarea class="rm-textarea" id="recipeText" placeholder="Rezept einfügen, z.B.:&#10;Pasta Bolognese für 4 Personen:&#10;500g Hackfleisch, 400g Spaghetti, 2 Zwiebeln, Tomatenmark, Sahne..."></textarea>
+    <div class="rm-btns">
+      <button class="rm-cancel" onclick="closeRecipe()">Abbrechen</button>
+      <button class="rm-import" onclick="importRecipe()">Importieren →</button>
+    </div>
+  </div>
+</div>
+
+<!-- VOICE -->
+<div id="voiceind">
+  <div class="vi-ring">🎙️</div>
+  <div class="vi-txt" id="voiceTxt">Spreche jetzt... z.B. "Butter und Milch"</div>
+  <button style="background:var(--rd);color:#fff;border-radius:20px;padding:8px 20px;font-size:13px;font-weight:500;margin-top:4px;" onclick="stopVoice()">Abbrechen</button>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════
+//  MAP DEFINITION  22×18 grid  (1 cell ≈ 1 m)
+//  0=walkable  1=wall  2=drinks  3=dairy  4=food  5=household
+//  6=produce   7=meat  8=checkout 9=bakery 10=entrance 12=freezer
+// ═══════════════════════════════════════════════════════════
+const MW=22,MH=18;
+const RAW=[
+//  0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21
+  [ 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],// 0
+  [ 1, 0, 6, 6, 6, 6, 0, 0, 7, 7, 7, 7, 7, 0, 9, 9, 0, 0, 0, 0, 0, 1],// 1 back wall
+  [ 1, 0, 6, 6, 6, 6, 0, 0, 7, 7, 7, 7, 7, 0, 9, 9, 0, 0, 0, 0, 0, 1],// 2
+  [ 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],// 3 cross-aisle
+  [ 1, 0, 2, 2, 0, 3, 3, 0, 4, 4, 0, 5, 5, 0,12,12, 0, 0, 0, 0, 0, 1],// 4
+  [ 1, 0, 2, 2, 0, 3, 3, 0, 4, 4, 0, 5, 5, 0,12,12, 0, 0, 0, 0, 0, 1],// 5
+  [ 1, 0, 2, 2, 0, 3, 3, 0, 4, 4, 0, 5, 5, 0,12,12, 0, 0, 0, 0, 0, 1],// 6
+  [ 1, 0, 2, 2, 0, 3, 3, 0, 4, 4, 0, 5, 5, 0,12,12, 0, 0, 0, 0, 0, 1],// 7
+  [ 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],// 8 main aisle
+  [ 1, 0, 2, 2, 0, 3, 3, 0, 4, 4, 0, 5, 5, 0,12,12, 0, 0, 0, 0, 0, 1],// 9
+  [ 1, 0, 2, 2, 0, 3, 3, 0, 4, 4, 0, 5, 5, 0,12,12, 0, 0, 0, 0, 0, 1],//10
+  [ 1, 0, 2, 2, 0, 3, 3, 0, 4, 4, 0, 5, 5, 0,12,12, 0, 0, 0, 0, 0, 1],//11
+  [ 1, 0, 2, 2, 0, 3, 3, 0, 4, 4, 0, 5, 5, 0,12,12, 0, 0, 0, 0, 0, 1],//12
+  [ 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],//13 cross-aisle
+  [ 1, 0, 8, 8, 0, 8, 8, 0, 8, 8, 0, 8, 8, 0, 8, 8, 0, 0, 0, 0, 0, 1],//14 checkouts
+  [ 1, 0, 8, 8, 0, 8, 8, 0, 8, 8, 0, 8, 8, 0, 8, 8, 0, 0, 0, 0, 0, 1],//15
+  [ 1, 0, 0, 0,10,10,10,10,10,10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],//16 entrance
+  [ 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],//17
+];
+function walkable(r,c){
+  if(r<0||c<0||r>=MH||c>=MW) return false;
+  const v=RAW[r][c]; return v===0||v===10;
+}
+
+// ═══════════════════════════════════════════════════════════
+//  A* PATHFINDING  with congestion cost
+// ═══════════════════════════════════════════════════════════
+function astar(sr,sc,er,ec,congMap){
+  const key=(r,c)=>r*100+c;
+  const h=(r,c)=>Math.abs(r-er)+Math.abs(c-ec);
+  const open=new Map(), gScore={}, parent={};
+  const sk=key(sr,sc); gScore[sk]=0; open.set(sk,h(sr,sc));
+  const dirs=[[0,1],[0,-1],[1,0],[-1,0]];
+  let iter=0;
+  while(open.size&&iter++<2000){
+    let bk=null,bf=Infinity;
+    for(const[k,f] of open) if(f<bf){bf=f;bk=k;}
+    open.delete(bk);
+    const r=Math.floor(bk/100),c=bk%100;
+    if(r===er&&c===ec){
+      const path=[];let cur=bk;
+      while(cur!==undefined){path.unshift([Math.floor(cur/100),cur%100]);cur=parent[cur];}
+      return path;
+    }
+    for(const[dr,dc] of dirs){
+      const nr=r+dr,nc=c+dc;
+      if(!walkable(nr,nc)) continue;
+      const nk=key(nr,nc);
+      // Congestion penalty: congested aisle costs up to 3x more
+      const cong=congMap?((congMap[nr]&&congMap[nr][nc])||0):0;
+      const cost=1+cong*2;
+      const ng=gScore[bk]+cost;
+      if(gScore[nk]===undefined||ng<gScore[nk]){
+        gScore[nk]=ng; parent[nk]=bk;
+        open.set(nk,ng+h(nr,nc));
+      }
+    }
+  }
+  return null;
+}
+
+function nearWalk(r,c){
+  for(const[dr,dc] of [[0,0],[-1,0],[1,0],[0,-1],[0,1],[-1,-1],[-1,1],[1,-1],[1,1]])
+    if(walkable(r+dr,c+dc)) return[r+dr,c+dc];
+  for(let d=1;d<=4;d++)
+    for(let dr=-d;dr<=d;dr++) for(let dc=-d;dc<=d;dc++)
+      if((Math.abs(dr)===d||Math.abs(dc)===d)&&walkable(r+dr,c+dc)) return[r+dr,c+dc];
+  return null;
+}
+
+function smoothPath(path){
+  if(!path||path.length<3) return path||[];
+  const o=[path[0]];
+  for(let i=1;i<path.length-1;i++){
+    const[pr,pc]=path[i-1],[r,c]=path[i],[nr,nc]=path[i+1];
+    if(r-pr!==nr-r||c-pc!==nc-c) o.push(path[i]);
+  }
+  o.push(path[path.length-1]);
+  return o;
+}
+
+// ═══════════════════════════════════════════════════════════
+//  TSP: nearest-neighbor heuristic with congestion weights
+//  Produces optimal visit order for all shopping list items
+// ═══════════════════════════════════════════════════════════
+function tspOrder(items, startR, startC, endR, endC, congMap){
+  if(!items.length) return [];
+  const visited=new Set();
+  const order=[];
+  let curR=startR,curC=startC;
+  while(order.length<items.length){
+    let best=null,bestCost=Infinity;
+    items.forEach((item,idx)=>{
+      if(visited.has(idx)) return;
+      const dest=nearWalk(item.pr,item.pc);
+      if(!dest) return;
+      const path=astar(curR,curC,dest[0],dest[1],congMap);
+      if(!path) return;
+      // Cost = path length + congestion weight on route
+      let cost=path.length;
+      path.forEach(([r,c])=>{if(congMap&&congMap[r]&&congMap[r][c]) cost+=congMap[r][c];});
+      if(cost<bestCost){bestCost=cost;best={idx,dest,cost};}
+    });
+    if(!best) break;
+    visited.add(best.idx);
+    order.push({...items[best.idx],_dest:best.dest});
+    curR=best.dest[0]; curC=best.dest[1];
+  }
+  return order;
+}
+
+// ═══════════════════════════════════════════════════════════
+//  DEPARTMENTS & PRODUCTS
+// ═══════════════════════════════════════════════════════════
+const DEPTS={
+  drinks:{key:'drinks',icon:'🍺',name:'Getränke',zone:'Gang A',color:'#1D9E75',bg:'rgba(29,158,117,.15)',
+    pos:{r:8,c:3},
+    prods:[
+      {n:'Wasser still 1,5L',    s:'A1',pr:5, pc:2},{n:'Wasser sprudelnd',   s:'A1',pr:6, pc:2},
+      {n:'Orangensaft 1L',       s:'A2',pr:7, pc:2},{n:'Apfelsaft',          s:'A2',pr:9, pc:2},
+      {n:'Cola Zero 1,5L',       s:'A3',pr:10,pc:2},{n:'Pils Bier 6er',      s:'A4',pr:11,pc:2},
+      {n:'Rotwein Cabernet',     s:'A5',pr:12,pc:2},{n:'Weißwein Riesling',  s:'A5',pr:4, pc:2},
+      {n:'Energydrink',          s:'A3',pr:5, pc:3},{n:'Eistee Pfirsich',    s:'A2',pr:6, pc:3},
+    ]},
+  dairy:{key:'dairy',icon:'🥛',name:'Molkerei & Käse',zone:'Gang B',color:'#4A9EFF',bg:'rgba(74,158,255,.15)',
+    pos:{r:8,c:6},
+    prods:[
+      {n:'Vollmilch 3,8%',       s:'B1',pr:4, pc:5},{n:'Hafermilch',         s:'B1',pr:5, pc:5},
+      {n:'Butter 250g',          s:'B3',pr:6, pc:5},{n:'Margarine',          s:'B3',pr:7, pc:5},
+      {n:'Joghurt natur',        s:'B2',pr:9, pc:5},{n:'Skyr',               s:'B2',pr:10,pc:5},
+      {n:'Gouda jung',           s:'B4',pr:11,pc:5},{n:'Mozzarella',         s:'B4',pr:12,pc:5},
+      {n:'Sahne 30%',            s:'B2',pr:9, pc:6},{n:'Quark mager',        s:'B2',pr:10,pc:6},
+      {n:'Frischkäse',           s:'B3',pr:11,pc:6},{n:'Kefir',              s:'B1',pr:4, pc:6},
+    ]},
+  food:{key:'food',icon:'🍝',name:'Grundnahrungsmittel',zone:'Gang C',color:'#F5A623',bg:'rgba(245,166,35,.15)',
+    pos:{r:8,c:9},
+    prods:[
+      {n:'Spaghetti 500g',       s:'C1',pr:4, pc:8},{n:'Penne rigate',       s:'C2',pr:5, pc:8},
+      {n:'Basmati Reis 1kg',     s:'C3',pr:6, pc:8},{n:'Weizenmehl 405',     s:'C1',pr:7, pc:8},
+      {n:'Zucker weiß 1kg',      s:'C4',pr:9, pc:8},{n:'Schokolade Vollmilch',s:'C5',pr:10,pc:8},
+      {n:'Lindt 70%',            s:'C5',pr:11,pc:8},{n:'Cornflakes',         s:'C6',pr:12,pc:8},
+      {n:'Haferflocken',         s:'C6',pr:4, pc:9},{n:'Ketchup Heinz',      s:'C7',pr:5, pc:9},
+      {n:'Tomatenmark',          s:'C7',pr:6, pc:9},{n:'Olivenöl',           s:'C4',pr:7, pc:9},
+    ]},
+  household:{key:'household',icon:'🧴',name:'Haushalt & Pflege',zone:'Gang D',color:'#C84FC8',bg:'rgba(200,79,200,.15)',
+    pos:{r:8,c:12},
+    prods:[
+      {n:'Fairy Spülmittel',     s:'D1',pr:4, pc:11},{n:'Ariel Pods',        s:'D2',pr:5, pc:11},
+      {n:'Head & Shoulders',     s:'D3',pr:6, pc:11},{n:'Oral-B Zahnpasta',  s:'D4',pr:7, pc:11},
+      {n:'Küchenpapier',         s:'D5',pr:9, pc:11},{n:'Müllbeutel 10L',    s:'D5',pr:10,pc:11},
+      {n:'Duschmittel Dove',     s:'D3',pr:11,pc:11},{n:'Handseife',         s:'D4',pr:12,pc:11},
+    ]},
+  produce:{key:'produce',icon:'🍎',name:'Obst & Gemüse',zone:'Hinterwand links',color:'#4AE54A',bg:'rgba(74,229,74,.15)',
+    pos:{r:3,c:4},
+    prods:[
+      {n:'Äpfel Pink Lady',      s:'OG1',pr:1,pc:2},{n:'Bananen Bio',        s:'OG1',pr:1,pc:3},
+      {n:'Tomaten Roma',         s:'OG2',pr:1,pc:4},{n:'Gurke',              s:'OG2',pr:1,pc:5},
+      {n:'Karotten 1kg',         s:'OG3',pr:2,pc:2},{n:'Babyspinat',         s:'OG3',pr:2,pc:3},
+      {n:'Paprika rot',          s:'OG2',pr:2,pc:4},{n:'Zwiebeln 1kg',       s:'OG4',pr:2,pc:5},
+    ]},
+  meat:{key:'meat',icon:'🥩',name:'Fleisch & Fisch',zone:'Hinterwand rechts',color:'#FF6B4A',bg:'rgba(255,107,74,.15)',
+    pos:{r:3,c:11},
+    prods:[
+      {n:'Hähnchenbrustfilet',   s:'FF1',pr:1,pc:9},{n:'Rinderhackfleisch', s:'FF1',pr:1,pc:10},
+      {n:'Lachsfilet',           s:'FF2',pr:1,pc:11},{n:'Garnelen TK',      s:'FF2',pr:1,pc:12},
+      {n:'Schweinefilet',        s:'FF1',pr:2,pc:9},{n:'Putenbrust',        s:'FF1',pr:2,pc:10},
+    ]},
+  bakery:{key:'bakery',icon:'🥐',name:'Bäckerei',zone:'Hinten rechts',color:'#FFCC44',bg:'rgba(255,204,68,.15)',
+    pos:{r:2,c:15},
+    prods:[
+      {n:'Sauerteigbrot',        s:'BK1',pr:1,pc:14},{n:'Baguette frisch',  s:'BK1',pr:1,pc:15},
+      {n:'Croissant',            s:'BK2',pr:2,pc:14},{n:'Laugenbrezel',     s:'BK2',pr:2,pc:15},
+    ]},
+  freezer:{key:'freezer',icon:'❄️',name:'Tiefkühlkost',zone:'Gang TK',color:'#44CCFF',bg:'rgba(68,204,255,.15)',
+    pos:{r:8,c:15},
+    prods:[
+      {n:'TK-Pizza Margherita',  s:'TK1',pr:4, pc:14},{n:'TK-Erbsen 450g',  s:'TK2',pr:6, pc:14},
+      {n:'Pommes frites',        s:'TK2',pr:9, pc:14},{n:'Vanille-Eis 1L',  s:'TK3',pr:11,pc:14},
+      {n:'TK-Spinat',            s:'TK2',pr:5, pc:15},{n:'Edamame TK',      s:'TK3',pr:10,pc:15},
+    ]},
+};
+
+const ALL_PRODS=[];
+for(const[dk,d] of Object.entries(DEPTS)) d.prods.forEach(p=>ALL_PRODS.push({...p,deptKey:dk,dept:d}));
+
+// Beacon zones
+const ZONES={
+  eingang: {r:16,c:7, label:'Eingang'},
+  gangA:   {r:8, c:3, label:'Gang A – Getränke'},
+  gangB:   {r:8, c:6, label:'Gang B – Molkerei & Käse'},
+  gangC:   {r:8, c:9, label:'Gang C – Grundnahrungsmittel'},
+  gangD:   {r:8, c:12,label:'Gang D – Haushalt & Pflege'},
+  gangTK:  {r:8, c:15,label:'Gang TK – Tiefkühl'},
+  produce: {r:3, c:4, label:'Obst & Gemüse'},
+  meat:    {r:3, c:11,label:'Fleisch & Fisch'},
+  bakery:  {r:2, c:15,label:'Bäckerei'},
+  kasse:   {r:15,c:6, label:'Kassenbereich'},
+};
+const ZONE_DEPT={gangA:'drinks',gangB:'dairy',gangC:'food',gangD:'household',gangTK:'freezer',produce:'produce',meat:'meat',bakery:'bakery'};
+const CHECKOUT={r:15,c:6};
+
+// ═══════════════════════════════════════════════════════════
+//  RUSH HOUR / STOßZEIT MODEL
+//  Per-cell congestion 0..1. Updated every 30s (simulated).
+//  Based on: time-of-day pattern + BLE density simulation.
+// ═══════════════════════════════════════════════════════════
+let congMap={}; // r→c→0..1
+let globalCong=0.45; // 0..1 overall store load
+let congByAisle={}; // aisle key → 0..1
+
+const AISLE_COLS={gangA:[2,3],gangB:[5,6],gangC:[8,9],gangD:[11,12],gangTK:[14,15]};
+const BACKWALL_ROWS=[1,2];
+const CHECKOUT_ROWS=[14,15];
+
+function timeBasedCong(){
+  const now=new Date();
+  const h=now.getHours(),m=now.getMinutes();
+  const t=h+m/60;
+  // Peak hours: 12-14, 17-19
+  if(t>=12&&t<=14) return 0.75+Math.random()*0.1;
+  if(t>=17&&t<=19) return 0.85+Math.random()*0.1;
+  if(t>=8&&t<=10)  return 0.45+Math.random()*0.1;
+  if(t>=20)        return 0.2+Math.random()*0.05;
+  return 0.35+Math.random()*0.1;
+}
+
+function updateCongestion(){
+  globalCong=timeBasedCong();
+  // Each aisle gets its own load with randomness (BLE density simulation)
+  congByAisle={
+    gangA: Math.min(1,globalCong*(0.7+Math.random()*0.6)),
+    gangB: Math.min(1,globalCong*(0.9+Math.random()*0.4)),
+    gangC: Math.min(1,globalCong*(0.8+Math.random()*0.5)),
+    gangD: Math.min(1,globalCong*(0.5+Math.random()*0.5)),
+    gangTK:Math.min(1,globalCong*(0.4+Math.random()*0.4)),
+    produce:Math.min(1,globalCong*(1.1+Math.random()*0.3)),
+    meat:  Math.min(1,globalCong*(0.9+Math.random()*0.3)),
+    bakery:Math.min(1,globalCong*(0.85+Math.random()*0.3)),
+    kasse: Math.min(1,globalCong*(1.2+Math.random()*0.2)),
+  };
+  // Build per-cell map
+  congMap={};
+  function setCell(r,c,v){if(!congMap[r])congMap[r]={};congMap[r][c]=v;}
+  for(const[ak,cols] of Object.entries(AISLE_COLS)){
+    const cv=congByAisle[ak]||0;
+    for(let r=3;r<=15;r++) for(const c of cols) setCell(r,c,cv*0.5);
+    // Aisle walkway (col between shelves)
+    for(let r=3;r<=15;r++) setCell(r,cols[0]-1,cv);
+  }
+  // Back wall
+  for(let r of BACKWALL_ROWS){
+    for(let c=1;c<MW-1;c++){
+      const v=c<=6?congByAisle.produce:c<=13?congByAisle.meat:congByAisle.bakery;
+      setCell(r,c,v);
+    }
+  }
+  // Checkout
+  for(let r of CHECKOUT_ROWS) for(let c=1;c<MW-1;c++) setCell(r,c,congByAisle.kasse||0.6);
+  // Cross-aisles get average
+  for(const r of [3,8,13]){
+    for(let c=1;c<MW-1;c++) setCell(r,c,globalCong*0.4);
+  }
+  updateStoßBar();
+  if(activeRoute) recalcRoute(); // Unteranspruch 2: Echtzeit-Neuberechnung
+  draw();
+}
+
+function updateStoßBar(){
+  const pct=Math.round(globalCong*100);
+  const fill=document.getElementById('szFill');
+  const val=document.getElementById('szVal');
+  const time=document.getElementById('szTime');
+  fill.style.width=pct+'%';
+  fill.style.background=pct>70?'var(--rd)':pct>45?'var(--am)':'var(--g)';
+  val.style.color=pct>70?'var(--rd)':pct>45?'var(--am)':'var(--g)';
+  val.textContent=pct+'%';
+  const now=new Date();
+  time.textContent=now.getHours().toString().padStart(2,'0')+':'+now.getMinutes().toString().padStart(2,'0');
+}
+
+// ═══════════════════════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════════════════════
+let curZone='eingang';
+let shoppingList=[
+  {name:'Butter 250g',    deptKey:'dairy',   done:false},
+  {name:'Vollmilch 3,8%', deptKey:'dairy',   done:false},
+  {name:'Spaghetti 500g', deptKey:'food',    done:false},
+  {name:'Äpfel Pink Lady',deptKey:'produce', done:true},
+  {name:'Pils Bier 6er',  deptKey:'drinks',  done:false},
+];
+let activeRoute=null;   // {orderedItems, fullPath, steps, totalDist}
+let highlightPin=null;  // {pr,pc}
+let curTab='list';
+let sheetOpen=false;
+let notifications=[];
+const dismissed=new Set();
+
+// ═══════════════════════════════════════════════════════════
+//  CANVAS SETUP
+// ═══════════════════════════════════════════════════════════
+const canvas=document.getElementById('map');
+const ctx=canvas.getContext('2d');
+const CELL=24;
+let scale=1,ox=0,oy=0;
+let drag=false,dX=0,dY=0,pinch0=0;
+
+function resize(){
+  canvas.width=canvas.parentElement.clientWidth;
+  canvas.height=canvas.parentElement.clientHeight;
+  fitView(); draw();
+}
+function fitView(){
+  const s=Math.min((canvas.width-24)/(MW*CELL),(canvas.height-24)/(MH*CELL));
+  scale=s;
+  ox=(canvas.width-MW*CELL*scale)/2;
+  oy=(canvas.height-MH*CELL*scale)/2;
+}
+function zm(f){
+  const cx=canvas.width/2,cy=canvas.height/2;
+  ox=cx-(cx-ox)*f; oy=cy-(cy-oy)*f;
+  scale=Math.max(0.35,Math.min(4.5,scale*f));
+  draw();
+}
+function resetView(){fitView();draw();}
+
+// ═══════════════════════════════════════════════════════════
+//  DRAW
+// ═══════════════════════════════════════════════════════════
+const CELL_COLOR={
+  0:'#161D2A',1:'#070A0F',2:'#081E12',3:'#08111F',
+  4:'#1C1006',5:'#16081A',6:'#081808',7:'#1A0A08',
+  8:'#0F0F1E',9:'#1A1400',10:'#0A2618',12:'#051018',
+};
+const CELL_STROKE={
+  2:'#1D9E75',3:'#4A9EFF',4:'#F5A623',5:'#C84FC8',
+  6:'#4AE54A',7:'#FF6B4A',8:'#6B7AFF',9:'#FFCC44',
+  10:'#00D4AA',12:'#44CCFF',
+};
+
+function congColor(v){
+  if(v>0.65) return`rgba(255,92,92,${v*0.55})`;
+  if(v>0.35) return`rgba(245,166,35,${v*0.55})`;
+  return`rgba(0,212,170,${v*0.35})`;
+}
+
+function draw(){
+  const W=canvas.width,H=canvas.height;
+  ctx.clearRect(0,0,W,H);
+  ctx.fillStyle='#050709'; ctx.fillRect(0,0,W,H);
+  ctx.save();
+  ctx.translate(ox,oy);
+  const cs=CELL*scale;
+
+  // ── CELLS ──
+  for(let r=0;r<MH;r++) for(let c=0;c<MW;c++){
+    const v=RAW[r][c];
+    const x=c*cs,y=r*cs;
+    if(v===1){
+      ctx.fillStyle='#07090E'; ctx.fillRect(x,y,cs,cs);
+      ctx.fillStyle='rgba(255,255,255,0.025)'; ctx.fillRect(x,y,cs,2*scale);
+      continue;
+    }
+    if(v===0){
+      ctx.fillStyle='#161D2A'; ctx.fillRect(x,y,cs,cs);
+      ctx.strokeStyle='rgba(255,255,255,0.018)'; ctx.lineWidth=.5; ctx.strokeRect(x,y,cs,cs);
+    } else {
+      ctx.fillStyle=CELL_COLOR[v]||'#161D2A'; ctx.fillRect(x,y,cs,cs);
+      const str=CELL_STROKE[v];
+      if(str){
+        ctx.strokeStyle=str; ctx.lineWidth=1.3*scale; ctx.globalAlpha=.6;
+        ctx.strokeRect(x+.6,y+.6,cs-1.2,cs-1.2); ctx.globalAlpha=1;
+        ctx.fillStyle=str; ctx.globalAlpha=.28; ctx.fillRect(x,y,cs,2.5*scale); ctx.globalAlpha=1;
+        // shelf lines
+        if([2,3,4,5,12].includes(v)&&scale>0.4){
+          ctx.strokeStyle=str; ctx.lineWidth=.7*scale; ctx.globalAlpha=.1;
+          for(let i=1;i<4;i++){ctx.beginPath();ctx.moveTo(x+2,y+i*cs/4);ctx.lineTo(x+cs-2,y+i*cs/4);ctx.stroke();}
+          ctx.globalAlpha=1;
+        }
+        // produce dots
+        if(v===6&&scale>0.45){
+          const dc=['#4AE54A','#FF6B4A','#FFCC44','#FF9944'];
+          for(let i=0;i<4;i++){
+            ctx.fillStyle=dc[i]; ctx.globalAlpha=.55;
+            ctx.beginPath();ctx.arc(x+3*scale+(i%2)*(cs*.45),y+3*scale+Math.floor(i/2)*(cs*.4),2.2*scale,0,Math.PI*2);ctx.fill();
+          }
+          ctx.globalAlpha=1;
+        }
+        // entrance arrows
+        if(v===10&&scale>0.4){
+          ctx.fillStyle='rgba(0,212,170,.55)';
+          ctx.font=`${cs*.55}px sans-serif`;
+          ctx.textAlign='center';ctx.textBaseline='middle';
+          ctx.fillText('▲',x+cs/2,y+cs/2);
+        }
+      }
+    }
+
+    // ── CONGESTION OVERLAY ──
+    const cong=congMap[r]&&congMap[r][c];
+    if(cong&&cong>0.08){
+      ctx.fillStyle=congColor(cong);
+      ctx.fillRect(x,y,cs,cs);
+    }
+  }
+
+  // ── AISLE LABELS ──
+  if(scale>0.5){
+    const labs=[
+      {c:3.5,r:8,txt:'A',col:'#1D9E75'},{c:6.5,r:8,txt:'B',col:'#4A9EFF'},
+      {c:9.5,r:8,txt:'C',col:'#F5A623'},{c:12.5,r:8,txt:'D',col:'#C84FC8'},
+      {c:15.5,r:8,txt:'TK',col:'#44CCFF'},
+    ];
+    labs.forEach(l=>{
+      ctx.font=`700 ${Math.round(8*scale)}px DM Sans,sans-serif`;
+      ctx.textAlign='center';ctx.textBaseline='middle';
+      ctx.fillStyle=l.col;ctx.globalAlpha=.65;
+      ctx.fillText(l.txt,l.c*cs,l.r*cs);ctx.globalAlpha=1;
+    });
+    const back=[
+      {c:4,r:1.5,txt:'Obst & Gemüse',col:'#4AE54A'},
+      {c:11,r:1.5,txt:'Fleisch & Fisch',col:'#FF6B4A'},
+      {c:15,r:2,txt:'Bäckerei',col:'#FFCC44'},
+    ];
+    back.forEach(l=>{
+      ctx.font=`${Math.round(7*scale)}px DM Sans,sans-serif`;
+      ctx.textAlign='center';ctx.textBaseline='middle';
+      ctx.fillStyle=l.col;ctx.globalAlpha=.6;
+      ctx.fillText(l.txt,l.c*cs,l.r*cs);ctx.globalAlpha=1;
+    });
+    // Checkout
+    ctx.font=`${Math.round(7*scale)}px DM Sans,sans-serif`;
+    ctx.textAlign='center';ctx.fillStyle='#6B7AFF';ctx.globalAlpha=.6;
+    ctx.fillText('Kasse',7*cs,14.5*cs);ctx.globalAlpha=1;
+  }
+
+  // ── SHOPPING LIST PINS ──
+  const deptKey=ZONE_DEPT[curZone];
+  shoppingList.forEach(item=>{
+    if(item.done) return;
+    const d=DEPTS[item.deptKey];if(!d) return;
+    const prod=d.prods.find(p=>p.n===item.name);if(!prod) return;
+    const px=(prod.pc+0.5)*cs,py=(prod.pr+0.5)*cs;
+    const isHL=highlightPin&&highlightPin.pr===prod.pr&&highlightPin.pc===prod.pc;
+    const isNear=item.deptKey===deptKey;
+    const clr=isHL?'#00D4AA':isNear?'#00D4AA':'#ffffff';
+    // glow
+    if(isHL||isNear){
+      ctx.strokeStyle=clr;ctx.lineWidth=1.5*scale;ctx.globalAlpha=.35;
+      ctx.beginPath();ctx.arc(px,py,12*scale,0,Math.PI*2);ctx.stroke();
+      ctx.globalAlpha=.15;
+      ctx.beginPath();ctx.arc(px,py,18*scale,0,Math.PI*2);ctx.stroke();
+      ctx.globalAlpha=1;
+    }
+    // pin
+    ctx.fillStyle=clr;ctx.globalAlpha=isHL?1:isNear?0.95:0.8;
+    ctx.beginPath();ctx.arc(px,py,5.5*scale,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle=isHL?'#000':'#1D9E75';ctx.globalAlpha=1;
+    ctx.beginPath();ctx.arc(px,py,2.5*scale,0,Math.PI*2);ctx.fill();
+    // label if highlighted
+    if(isHL&&scale>0.55){
+      ctx.font=`500 ${Math.round(8*scale)}px DM Sans,sans-serif`;
+      const tw=ctx.measureText(item.name).width;
+      ctx.fillStyle='rgba(0,0,0,.88)';
+      ctx.beginPath();ctx.roundRect(px-tw/2-5,py-22*scale,tw+10,13*scale,3*scale);ctx.fill();
+      ctx.fillStyle='#00D4AA';ctx.textAlign='center';ctx.textBaseline='middle';
+      ctx.fillText(item.name,px,py-16*scale);
+    }
+  });
+
+  // ── FULL ROUTE (TSP-ordered segments) ──
+  if(activeRoute&&activeRoute.fullPath&&activeRoute.fullPath.length>1){
+    const pts=smoothPath(activeRoute.fullPath);
+    ctx.strokeStyle='#00D4AA'; ctx.lineWidth=3*scale;
+    ctx.setLineDash([7*scale,5*scale]); ctx.lineCap='round'; ctx.lineJoin='round';
+    ctx.globalAlpha=.8;
+    ctx.beginPath();
+    ctx.moveTo((pts[0][1]+.5)*cs,(pts[0][0]+.5)*cs);
+    for(let i=1;i<pts.length;i++) ctx.lineTo((pts[i][1]+.5)*cs,(pts[i][0]+.5)*cs);
+    ctx.stroke(); ctx.setLineDash([]); ctx.globalAlpha=1;
+
+    // Direction arrow mid-route
+    if(pts.length>3){
+      const mi=Math.floor(pts.length/2);
+      const[r0,c0]=pts[mi-1],[r1,c1]=pts[mi];
+      const ax=(c0+.5)*cs,ay=(r0+.5)*cs,bx=(c1+.5)*cs,by=(r1+.5)*cs;
+      const ang=Math.atan2(by-ay,bx-ax);
+      ctx.save(); ctx.translate((ax+bx)/2,(ay+by)/2); ctx.rotate(ang);
+      ctx.fillStyle='#00D4AA'; ctx.globalAlpha=.9;
+      ctx.beginPath(); ctx.moveTo(7*scale,0); ctx.lineTo(-5*scale,-4*scale); ctx.lineTo(-5*scale,4*scale);
+      ctx.closePath(); ctx.fill(); ctx.globalAlpha=1; ctx.restore();
+    }
+
+    // Waypoint circles for each item stop
+    activeRoute.orderedItems.forEach((item,idx)=>{
+      if(!item._dest) return;
+      const dx=(item._dest[1]+.5)*cs,dy=(item._dest[0]+.5)*cs;
+      const done=shoppingList.find(i=>i.name===item.name)?.done;
+      ctx.strokeStyle=done?'rgba(0,212,170,.3)':'#00D4AA';
+      ctx.lineWidth=2*scale; ctx.globalAlpha=done?.3:.5;
+      ctx.beginPath();ctx.arc(dx,dy,9*scale,0,Math.PI*2);ctx.stroke();
+      ctx.globalAlpha=1;
+      // Stop number
+      if(scale>0.5){
+        ctx.fillStyle=done?'rgba(0,212,170,.4)':'rgba(0,212,170,.85)';
+        ctx.beginPath();ctx.arc(dx,dy,7*scale,0,Math.PI*2);ctx.fill();
+        ctx.fillStyle=done?'rgba(255,255,255,.4)':'#000';
+        ctx.font=`700 ${Math.round(7*scale)}px DM Mono,monospace`;
+        ctx.textAlign='center';ctx.textBaseline='middle';
+        ctx.fillText(idx+1,dx,dy);
+      }
+    });
+
+    // Checkout destination
+    const chx=(CHECKOUT.c+.5)*cs,chy=(CHECKOUT.r+.5)*cs;
+    ctx.strokeStyle='#6B7AFF'; ctx.lineWidth=2*scale; ctx.globalAlpha=.6;
+    ctx.beginPath();ctx.arc(chx,chy,9*scale,0,Math.PI*2);ctx.stroke();
+    ctx.fillStyle='rgba(107,122,255,.8)';
+    ctx.beginPath();ctx.arc(chx,chy,6*scale,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='#fff'; ctx.globalAlpha=1;
+    ctx.font=`700 ${Math.round(7*scale)}px DM Sans,sans-serif`;
+    ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillText('K',chx,chy);
+  }
+
+  // ── PLAYER DOT ──
+  const z=ZONES[curZone];
+  const px=(z.c+.5)*cs,py2=(z.r+.5)*cs;
+  ctx.strokeStyle='#00D4AA'; ctx.lineWidth=1.5*scale;
+  ctx.globalAlpha=.18; ctx.beginPath();ctx.arc(px,py2,18*scale,0,Math.PI*2);ctx.stroke();
+  ctx.globalAlpha=.32; ctx.beginPath();ctx.arc(px,py2,11*scale,0,Math.PI*2);ctx.stroke();
+  ctx.globalAlpha=1;
+  ctx.fillStyle='#00D4AA'; ctx.beginPath();ctx.arc(px,py2,6.5*scale,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='#fff'; ctx.beginPath();ctx.arc(px,py2,2.8*scale,0,Math.PI*2);ctx.fill();
+  if(scale>0.45){
+    const lbl='Sie sind hier';
+    ctx.font=`500 ${Math.round(8*scale)}px DM Sans,sans-serif`;
+    const tw=ctx.measureText(lbl).width;
+    ctx.fillStyle='rgba(8,11,17,.9)';
+    ctx.beginPath();ctx.roundRect(px-tw/2-5,py2+9*scale,tw+10,13*scale,3*scale);ctx.fill();
+    ctx.fillStyle='#00D4AA';ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillText(lbl,px,py2+15.5*scale);
+  }
+  ctx.restore();
+}
+
+// ── Map interactions ──
+canvas.addEventListener('pointerdown',e=>{drag=true;dX=e.clientX;dY=e.clientY;});
+window.addEventListener('pointermove',e=>{if(!drag)return;ox+=e.clientX-dX;oy+=e.clientY-dY;dX=e.clientX;dY=e.clientY;draw();});
+window.addEventListener('pointerup',()=>drag=false);
+canvas.addEventListener('touchstart',e=>{if(e.touches.length===2)pinch0=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);},{passive:true});
+canvas.addEventListener('touchmove',e=>{if(e.touches.length===2){const d=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);if(pinch0>0)zm(d/pinch0);pinch0=d;}},{passive:true});
+canvas.addEventListener('click',e=>{
+  const r=canvas.getBoundingClientRect();
+  const gr=Math.floor((e.clientY-r.top-oy)/(CELL*scale));
+  const gc=Math.floor((e.clientX-r.left-ox)/(CELL*scale));
+  if(gr<0||gc<0||gr>=MH||gc>=MW) return;
+  const v=RAW[gr][gc];
+  const dm={2:'drinks',3:'dairy',4:'food',5:'household',6:'produce',7:'meat',9:'bakery',12:'freezer'};
+  if(dm[v]) openDeptOverlay(dm[v]);
+});
+
+// ═══════════════════════════════════════════════════════════
+//  ROUTE CALCULATION  (Patent §3.3: KI-Routenoptimierungsmodul)
+//  1. Get undone shopping list items with real positions
+//  2. TSP nearest-neighbor with congestion weights
+//  3. A* per segment, concatenate full path
+//  4. Add checkout as final stop
+// ═══════════════════════════════════════════════════════════
+function calcFullRoute(){
+  const z=ZONES[curZone];
+  const items=shoppingList.filter(i=>!i.done).map(i=>{
+    const d=DEPTS[i.deptKey];if(!d) return null;
+    const prod=d.prods.find(p=>p.n===i.name);
+    if(!prod) return {...i,pr:d.pos.r,pc:d.pos.c};
+    return {...i,pr:prod.pr,pc:prod.pc};
+  }).filter(Boolean);
+
+  if(!items.length){
+    clearRoute();
+    showToast('🛒 Alle Artikel abgehakt – ab zur Kasse!');
+    return;
+  }
+
+  // TSP: ordered stops
+  const orderedItems=tspOrder(items,z.r,z.c,CHECKOUT.r,CHECKOUT.c,congMap);
+
+  // Build full path: start → stop1 → stop2 → ... → checkout
+  let fullPath=[];
+  let curR=z.r,curC=z.c;
+  const stops=[...orderedItems.map(i=>i._dest||nearWalk(i.pr,i.pc)),nearWalk(CHECKOUT.r,CHECKOUT.c)];
+
+  for(const stop of stops){
+    if(!stop) continue;
+    const seg=astar(curR,curC,stop[0],stop[1],congMap);
+    if(seg&&seg.length>1){
+      if(fullPath.length) fullPath=[...fullPath,...seg.slice(1)];
+      else fullPath=seg;
+    }
+    curR=stop[0]; curC=stop[1];
+  }
+
+  const totalDist=Math.round(fullPath.length*0.85);
+  const steps=buildSteps(orderedItems,z);
+  activeRoute={orderedItems,fullPath,steps,totalDist};
+
+  renderRouteBar();
+  draw();
+}
+
+function recalcRoute(){
+  if(!activeRoute) return;
+  calcFullRoute();
+}
+
+function buildSteps(ordered,startZone){
+  const steps=[];
+  steps.push({type:'start',icon:'📍',name:'Start: '+startZone.label,dist:'',warn:false});
+  ordered.forEach((item,i)=>{
+    const dk=item.deptKey,d=DEPTS[dk];
+    const prod=d?.prods.find(p=>p.n===item.name);
+    const cong=congByAisle[Object.keys(ZONE_DEPT).find(k=>ZONE_DEPT[k]===dk)]||0;
+    const warn=cong>0.65;
+    steps.push({
+      type:'stop',icon:d?.icon||'📦',
+      name:item.name,
+      dist:d?.zone+(prod?' · Regal '+prod.s:''),
+      warn,congPct:Math.round(cong*100),stop:i+1
+    });
+  });
+  steps.push({type:'end',icon:'🏁',name:'Kasse',dist:'Kassenbereich',warn:congByAisle.kasse>0.7});
+  return steps;
+}
+
+function renderRouteBar(){
+  if(!activeRoute) return;
+  document.getElementById('rbTitle').textContent=`Optimierte Route (${activeRoute.orderedItems.length} Artikel)`;
+  document.getElementById('rbDist').textContent=`~${activeRoute.totalDist}m`;
+  const sc=document.getElementById('stepscroll');
+  sc.innerHTML=activeRoute.steps.map((s,i)=>{
+    const cls=i===0?'active':s.warn?'warn':'';
+    return`<div class="step ${cls}">
+      <div class="step-ico">${s.icon}</div>
+      <div class="step-info">
+        <div class="step-name">${s.stop?s.stop+'. ':''}${s.name}</div>
+        <div class="step-dist">${s.warn?'⚠️ '+s.congPct+'% belegt · ':''} ${s.dist||''}</div>
+      </div>
+    </div>`;
+  }).join('');
+  document.getElementById('routebar').classList.add('show');
+}
+
+function clearRoute(){
+  activeRoute=null; highlightPin=null;
+  document.getElementById('routebar').classList.remove('show');
+  draw();
+}
+
+// ═══════════════════════════════════════════════════════════
+//  ZONE UPDATE (Beacon trigger)
+// ═══════════════════════════════════════════════════════════
+function setZone(zk){
+  curZone=zk;
+  const z=ZONES[zk];
+  document.getElementById('zoneTxt').textContent=z.label;
+  document.getElementById('zonelbl').textContent=z.label;
+
+  // Recenter map on player
+  const cs=CELL*scale;
+  ox=canvas.width/2-(z.c+.5)*cs;
+  oy=canvas.height/2-(z.r+.5)*cs;
+
+  if(activeRoute) recalcRoute();
+  buildNotifications();
+  renderSheet();
+  draw();
+}
+
+// ═══════════════════════════════════════════════════════════
+//  NOTIFICATIONS
+// ═══════════════════════════════════════════════════════════
+const SMART_SUGG={
+  gangA: {prod:'Cola Zero 1,5L',dk:'drinks',txt:'Du bist bei Getränken – Cola Zero liegt direkt vor dir!'},
+  gangB: {prod:'Frischkäse',   dk:'dairy', txt:'Frischkäse direkt neben deiner Butter – gleich mitnehmen?'},
+  gangC: {prod:'Olivenöl',     dk:'food',  txt:'Olivenöl auf dem Weg zu den Nudeln – fast leer zu Hause?'},
+  gangD: {prod:'Duschmittel Dove',dk:'household',txt:'Duschmittel liegt direkt auf deinem Weg!'},
+  produce:{prod:'Paprika rot', dk:'produce',txt:'Rote Paprika – heute im Angebot −30%!'},
+  meat:  {prod:'Lachsfilet',   dk:'meat',  txt:'Frischer Lachs, heute geliefert – Angebot!'},
+  gangTK:{prod:'TK-Spinat',    dk:'freezer',txt:'TK-Spinat liegt auf deiner Route!'},
+};
+
+function buildNotifications(){
+  notifications=[];
+  const deptKey=ZONE_DEPT[curZone];
+  const cong=deptKey?congByAisle[Object.keys(ZONE_DEPT).find(k=>ZONE_DEPT[k]===deptKey)]||0:0;
+
+  // 1. Nearby items on list
+  if(deptKey){
+    const near=shoppingList.filter(i=>!i.done&&i.deptKey===deptKey);
+    if(near.length>0){
+      notifications.push({
+        id:'prox_'+curZone,type:'green',icon:'📍',
+        title:near.length===1?near[0].name+' ist auf deiner Liste!':near.length+' Artikel deiner Liste sind hier!',
+        text:ZONES[curZone].label,
+        acts:[
+          ...near.slice(0,2).map(it=>({lbl:'✓ '+it.name,cls:'a',fn:`checkOff('${it.name}')`})),
+          {lbl:'Auf Karte zeigen',cls:'b',fn:`pinItem('${near[0].name}','${deptKey}')`}
+        ]
+      });
+    }
+  }
+
+  // 2. Congestion warning for current zone
+  if(cong>0.65){
+    notifications.push({
+      id:'cong_'+curZone,type:'red',icon:'⚠️',
+      title:'Hohes Besucheraufkommen hier',
+      text:`${ZONES[curZone].label} ist aktuell zu ${Math.round(cong*100)}% belegt. Route wurde angepasst.`,
+      acts:[{lbl:'Alternative Route',cls:'d',fn:`calcFullRoute()`}]
+    });
+  }
+
+  // 3. Smart suggestion
+  const s=SMART_SUGG[curZone];
+  if(s&&!shoppingList.find(i=>i.name===s.prod)){
+    notifications.push({
+      id:'sugg_'+curZone,type:'amber',icon:'💡',
+      title:'Smarter Tipp',text:s.txt,
+      acts:[{lbl:'+ Zur Liste & Route',cls:'c',fn:`addSugg('${s.prod}','${s.dk}')`}]
+    });
+  }
+
+  // 4. Next item
+  const remaining=shoppingList.filter(i=>!i.done);
+  if(remaining.length&&remaining[0].deptKey!==deptKey){
+    const nd=remaining[0],di=DEPTS[nd.deptKey];
+    if(di) notifications.push({
+      id:'next_'+nd.name,type:'blue',icon:'🧭',
+      title:'Nächster Artikel: '+nd.name,
+      text:di.name+' · '+di.zone,
+      acts:[{lbl:'Route berechnen',cls:'b',fn:`routeToItem('${nd.name}','${nd.deptKey}')`}]
+    });
+  }
+
+  document.getElementById('alertBadge').style.display=notifications.filter(n=>!dismissed.has(n.id)).length?'flex':'none';
+  if(curTab==='alerts') renderSheet();
+}
+
+function checkOff(name){
+  const it=shoppingList.find(i=>i.name===name);if(it) it.done=true;
+  updateBadge();buildNotifications();renderSheet();
+  if(activeRoute) recalcRoute();
+  draw();showToast('✓ '+name+' abgehakt!');
+}
+
+function pinItem(name,dk){
+  const d=DEPTS[dk];if(!d) return;
+  const prod=d.prods.find(p=>p.n===name);if(!prod) return;
+  highlightPin={pr:prod.pr,pc:prod.pc};
+  // Center map on pin
+  const cs=CELL*scale;
+  ox=canvas.width/2-(prod.pc+.5)*cs;
+  oy=canvas.height/2-(prod.pr+.5)*cs;
+  draw();
+}
+
+function routeToItem(name,dk){
+  highlightPin=null;
+  // Add to list if not there
+  if(!shoppingList.find(i=>i.name===name)) shoppingList.push({name,deptKey:dk,done:false});
+  calcFullRoute();updateBadge();renderSheet();
+}
+
+function addSugg(name,dk){
+  if(!shoppingList.find(i=>i.name===name)) shoppingList.push({name,deptKey:dk,done:false});
+  dismissed.add('sugg_'+curZone);
+  updateBadge();buildNotifications();renderSheet();
+  calcFullRoute();draw();
+  showToast('✓ '+name+' hinzugefügt & Route aktualisiert');
+}
+
+function updateBadge(){
+  document.getElementById('cartBadge').textContent=shoppingList.filter(i=>!i.done).length;
+}
+
+// ═══════════════════════════════════════════════════════════
+//  SHEET TABS
+// ═══════════════════════════════════════════════════════════
+function toggleSheet(){sheetOpen=!sheetOpen;document.getElementById('sheet').classList.toggle('open',sheetOpen);}
+
+function switchTab(e,tab){
+  if(e) e.stopPropagation();
+  curTab=tab;
+  document.querySelectorAll('.stab').forEach(t=>t.classList.toggle('on',t.dataset.tab===tab));
+  sheetOpen=true;document.getElementById('sheet').classList.add('open');
+  renderSheet();
+}
+
+function renderSheet(){
+  const b=document.getElementById('shbody');
+  if(curTab==='list')      b.innerHTML=buildList();
+  else if(curTab==='recs') b.innerHTML=buildRecs();
+  else if(curTab==='stoßzeiten') b.innerHTML=buildStoßzeiten();
+  else if(curTab==='depts')b.innerHTML=buildDepts();
+  else b.innerHTML=buildAlerts();
+}
+
+function buildList(){
+  const deptKey=ZONE_DEPT[curZone];
+  // Show in route order if active
+  const orderedNames=activeRoute?activeRoute.orderedItems.map(i=>i.name):null;
+  const sorted=orderedNames
+    ?[...shoppingList].sort((a,b)=>{
+        const ai=orderedNames.indexOf(a.name),bi=orderedNames.indexOf(b.name);
+        if(a.done&&!b.done) return 1;if(!a.done&&b.done) return -1;
+        if(ai===-1&&bi===-1) return 0;if(ai===-1) return 1;if(bi===-1) return -1;
+        return ai-bi;
+      })
+    :shoppingList;
+
+  let h=sorted.map((item,si)=>{
+    const nearby=!item.done&&item.deptKey===deptKey;
+    const di=DEPTS[item.deptKey];
+    const cong=di?congByAisle[Object.keys(ZONE_DEPT).find(k=>ZONE_DEPT[k]===item.deptKey)]||0:0;
+    const warn=!item.done&&cong>0.65;
+    const routeIdx=orderedNames?orderedNames.indexOf(item.name):-1;
+    const cls=[nearby?'nearby':warn?'warn-sz':'',item.done?'done':''].join(' ').trim();
+    return`<div class="sli ${cls}">
+      ${routeIdx>=0&&!item.done?`<div class="sli-num active-step">${routeIdx+1}</div>`:`<div class="sli-num">${si+1}</div>`}
+      <div class="sli-cb" onclick="toggleItem('${item.name}')">${item.done?'✓':''}</div>
+      <div class="sli-body">
+        <div class="sli-name">${item.name}</div>
+        <div class="sli-sub">${di?di.name+' · '+di.zone:''}</div>
+      </div>
+      ${nearby?`<div class="sli-pill pill-here">Hier!</div>`
+        :warn?`<div class="sli-pill pill-warn">⚠️ ${Math.round(cong*100)}%</div>`
+        :`<div class="sli-nav" onclick="routeToItem('${item.name}','${item.deptKey}')">Route</div>`}
+    </div>`;
+  }).join('');
+  h+=`<div class="add-row">
+    <input class="add-inp" id="addinp" placeholder="Artikel hinzufügen..." onkeydown="if(event.key==='Enter')addItem()">
+    <button class="add-btn" onclick="addItem()">+</button>
+  </div>`;
+  if(!activeRoute){
+    h+=`<button onclick="calcFullRoute()" style="width:100%;margin-top:10px;background:var(--g);color:#000;border-radius:var(--rsm);padding:11px;font-size:13px;font-weight:600;">🧭 Optimierte Route berechnen</button>`;
+  }
+  return h;
+}
+
+function buildRecs(){
+  // Products on or near the active route that are not yet on list
+  const onList=new Set(shoppingList.map(i=>i.name));
+  const recs=[];
+
+  // If active route: find products in same depts as route stops, not yet listed
+  if(activeRoute){
+    const routeDepts=new Set(activeRoute.orderedItems.map(i=>i.deptKey));
+    for(const dk of routeDepts){
+      const d=DEPTS[dk];if(!d) continue;
+      d.prods.forEach(p=>{
+        if(!onList.has(p.n)) recs.push({...p,deptKey:dk,dept:d,reason:'onroute'});
+      });
+    }
+  }
+  // Deals (simulated)
+  const deals=[
+    {n:'Paprika rot',dk:'produce',txt:'−30% heute'},{n:'Lachsfilet',dk:'meat',txt:'−20% frisch'},
+    {n:'Lindt 70%',dk:'food',txt:'2 für 3€'},{n:'Hafermilch',dk:'dairy',txt:'Neu im Sortiment'},
+  ];
+  deals.forEach(deal=>{
+    if(!onList.has(deal.n)) recs.push({n:deal.n,deptKey:deal.dk,dept:DEPTS[deal.dk],reason:'deal',dealTxt:deal.txt});
+  });
+
+  const unique=recs.filter((r,i,a)=>a.findIndex(x=>x.n===r.n)===i).slice(0,12);
+  if(!unique.length) return`<div style="padding:16px 0;text-align:center;color:var(--t3);font-size:13px;">Füge Artikel zur Liste hinzu um personalisierte Empfehlungen zu erhalten.</div>`;
+
+  const onRoute=unique.filter(r=>r.reason==='onroute');
+  const dealsR=unique.filter(r=>r.reason==='deal');
+
+  let h='';
+  if(onRoute.length){
+    h+=`<div class="rec-head">🧭 Auf deiner Route</div>
+    <div class="rec-grid">${onRoute.slice(0,6).map(p=>`
+      <div class="rec-card" onclick="addFromRec('${p.n}','${p.deptKey}')">
+        <div class="rc-ico">${p.dept?.icon||'📦'}</div>
+        <div class="rc-name">${p.n}</div>
+        <div class="rc-shelf">Regal ${p.s||'–'}</div>
+        <div class="rc-badge onroute">Auf Route</div>
+        <div class="rc-add">+ Hinzufügen</div>
+      </div>`).join('')}</div>`;
+  }
+  if(dealsR.length){
+    h+=`<div class="rec-head" style="margin-top:14px;">🏷️ Angebote & Neuheiten</div>
+    <div class="rec-grid">${dealsR.map(p=>`
+      <div class="rec-card" onclick="addFromRec('${p.n}','${p.deptKey}')">
+        <div class="rc-ico">${p.dept?.icon||'📦'}</div>
+        <div class="rc-name">${p.n}</div>
+        <div class="rc-shelf">${p.dealTxt||''}</div>
+        <div class="rc-badge deal">Angebot</div>
+        <div class="rc-add">+ Hinzufügen</div>
+      </div>`).join('')}</div>`;
+  }
+  return h;
+}
+
+function buildStoßzeiten(){
+  const aisles=[
+    {key:'produce',name:'Obst & Gemüse',icon:'🍎'},
+    {key:'gangB',  name:'Molkerei Gang B',icon:'🥛'},
+    {key:'meat',   name:'Fleisch & Fisch',icon:'🥩'},
+    {key:'bakery', name:'Bäckerei',icon:'🥐'},
+    {key:'gangA',  name:'Getränke Gang A',icon:'🍺'},
+    {key:'gangC',  name:'Lebensmittel Gang C',icon:'🍝'},
+    {key:'gangD',  name:'Haushalt Gang D',icon:'🧴'},
+    {key:'gangTK', name:'Tiefkühlkost',icon:'❄️'},
+    {key:'kasse',  name:'Kassenbereich',icon:'🏁'},
+  ];
+  const rows=aisles.map(a=>{
+    const v=congByAisle[a.key]||0;
+    const pct=Math.round(v*100);
+    const col=pct>65?'var(--rd)':pct>40?'var(--am)':'var(--g)';
+    const lbl=pct>65?'Stark belegt':pct>40?'Mäßig belegt':'Gut begehbar';
+    return`<div class="sz-row">
+      <span style="font-size:16px;">${a.icon}</span>
+      <div class="sz-name">${a.name}</div>
+      <div class="sz-bar"><div class="sz-bfill" style="width:${pct}%;background:${col}"></div></div>
+      <div class="sz-pct" style="color:${col}">${pct}%</div>
+    </div>`;
+  }).join('');
+  const avoidKeys=aisles.filter(a=>(congByAisle[a.key]||0)>0.65).map(a=>a.name);
+  const avoidNote=avoidKeys.length?`<div style="background:var(--rdbg);border:1px solid rgba(255,92,92,.2);border-radius:var(--rsm);padding:9px 11px;margin-bottom:10px;font-size:12px;color:var(--rd);">⚠️ Aktuell stark belegt: ${avoidKeys.join(', ')}. Route wurde automatisch angepasst.</div>`:
+    `<div style="background:var(--gbg);border:1px solid var(--gbdr);border-radius:var(--rsm);padding:9px 11px;margin-bottom:10px;font-size:12px;color:var(--g);">✓ Keine Engpässe. Route ist optimal.</div>`;
+  return avoidNote+rows+`<div style="font-size:11px;color:var(--t3);margin-top:10px;text-align:center;">Aktualisiert alle 30 Sekunden · Basierend auf BLE-Signaldichte</div>`;
+}
+
+function buildDepts(){
+  return`<div class="dgrid">${Object.values(DEPTS).map(d=>{
+    const zoneKey=Object.keys(ZONE_DEPT).find(k=>ZONE_DEPT[k]===d.key);
+    const cong=congByAisle[zoneKey]||0;
+    const col=cong>0.65?'#FF5C5C':cong>0.4?'#F5A623':'#00D4AA';
+    return`<div class="dc" onclick="openDeptOverlay('${d.key}')">
+      <div class="dc-ico">${d.icon}</div>
+      <div class="dc-name">${d.name}</div>
+      <div class="dc-zone">${d.zone}</div>
+      <div class="dc-sz" style="background:${col}"></div>
+    </div>`;
+  }).join('')}</div>`;
+}
+
+function buildAlerts(){
+  const vis=notifications.filter(n=>!dismissed.has(n.id));
+  if(!vis.length) return`<div style="padding:20px 0;text-align:center;color:var(--t3);font-size:13px;">Keine aktuellen Hinweise.</div>`;
+  return vis.map(n=>`
+    <div class="notif ${n.type}">
+      <div class="n-ico">${n.icon}</div>
+      <div class="n-body">
+        <div class="n-title">${n.title}</div>
+        <div class="n-txt">${n.text}</div>
+        ${n.acts?`<div class="n-acts">${n.acts.map(a=>`<button class="nact ${a.cls}" onclick="${a.fn}">${a.lbl}</button>`).join('')}</div>`:''}
+      </div>
+      <div class="n-x" onclick="dismissN('${n.id}')">✕</div>
+    </div>`).join('');
+}
+
+function toggleItem(name){
+  const it=shoppingList.find(i=>i.name===name);if(it) it.done=!it.done;
+  updateBadge();buildNotifications();renderSheet();
+  if(activeRoute) recalcRoute();draw();
+}
+
+function addItem(){
+  const inp=document.getElementById('addinp');if(!inp) return;
+  const v=inp.value.trim();if(!v) return;
+  const dk=guessDept(v.toLowerCase());
+  shoppingList.push({name:v,deptKey:dk,done:false});
+  inp.value='';updateBadge();renderSheet();draw();
+  showToast('✓ '+v+' zur Liste hinzugefügt');
+  if(activeRoute) recalcRoute();
+}
+
+function dismissN(id){dismissed.add(id);renderSheet();updateBadge();}
+
+function addFromRec(name,dk){
+  if(!shoppingList.find(i=>i.name===name)) shoppingList.push({name,deptKey:dk,done:false});
+  updateBadge();renderSheet();
+  calcFullRoute();
+  showToast('✓ '+name+' hinzugefügt & Route aktualisiert');
+}
+
+// ═══════════════════════════════════════════════════════════
+//  SEARCH (Patent §3.4: Manuelle Texteingabe)
+// ═══════════════════════════════════════════════════════════
+function onSearch(v){
+  const lv=v.trim().toLowerCase();
+  const res=document.getElementById('searchResults');
+  if(!lv||lv.length<2){res.classList.remove('show');res.innerHTML='';return;}
+  const hits=ALL_PRODS.filter(p=>p.n.toLowerCase().includes(lv)||p.dept.name.toLowerCase().includes(lv)).slice(0,8);
+  if(!hits.length){res.classList.remove('show');return;}
+  res.innerHTML=hits.map(h=>`
+    <div class="sr-item" onclick="selectResult('${h.n}','${h.deptKey}')">
+      <div class="sr-ico">${h.dept.icon}</div>
+      <div class="sr-info">
+        <div class="sr-name">${h.n}</div>
+        <div class="sr-dept">${h.dept.name} · Regal ${h.s}</div>
+      </div>
+      <div class="sr-add">+ Liste</div>
+    </div>`).join('');
+  res.classList.add('show');
+}
+
+function selectResult(name,dk){
+  document.getElementById('sinput').value='';
+  document.getElementById('searchResults').classList.remove('show');
+  if(!shoppingList.find(i=>i.name===name)) shoppingList.push({name,deptKey:dk,done:false});
+  updateBadge();renderSheet();calcFullRoute();draw();
+  showToast('✓ '+name+' hinzugefügt – Route aktualisiert');
+}
+
+function searchEnter(){
+  const v=document.getElementById('sinput').value.trim().toLowerCase();
+  const hit=ALL_PRODS.find(p=>p.n.toLowerCase().includes(v));
+  if(hit) selectResult(hit.n,hit.deptKey);
+}
+
+function closeResults(){document.getElementById('searchResults').classList.remove('show');}
+function clearSearch(){document.getElementById('sinput').value='';closeResults();}
+
+function chipClick(el,k){
+  document.querySelectorAll('.chip').forEach(c=>c.classList.remove('on'));
+  el.classList.add('on');
+  if(k==='route'){calcFullRoute();sheetOpen=true;document.getElementById('sheet').classList.add('open');}
+  else if(k!=='all'&&DEPTS[k]) openDeptOverlay(k);
+}
+
+// ═══════════════════════════════════════════════════════════
+//  DEPT OVERLAY
+// ═══════════════════════════════════════════════════════════
+function openDeptOverlay(key){
+  const d=DEPTS[key];if(!d) return;
+  const zk=Object.keys(ZONE_DEPT).find(k=>ZONE_DEPT[k]===key);
+  const cong=congByAisle[zk]||0;
+  document.getElementById('ovIco').textContent=d.icon;
+  document.getElementById('ovIco').style.background=d.bg;
+  document.getElementById('ovTitle').textContent=d.name;
+  document.getElementById('ovSub').textContent=d.zone+(cong>0.5?` · ⚠️ ${Math.round(cong*100)}% belegt`:'');
+  const routeDepts=new Set(activeRoute?.orderedItems.map(i=>i.deptKey)||[]);
+  document.getElementById('ovProds').innerHTML=d.prods.map(p=>{
+    const onList=shoppingList.find(i=>i.name===p.n);
+    const onRoute=routeDepts.has(key);
+    return`<div class="ovp">
+      <div class="ovp-name">${p.n}</div>
+      <div class="ovp-shelf">Regal ${p.s}</div>
+      ${onRoute?'<div class="ovp-onroute">✓ Auf deiner Route</div>':''}
+      <div class="ovp-add" onclick="addFromOverlay('${p.n}','${key}')">
+        ${onList?'✓ Auf Liste':'+ Liste & Route'}
+      </div>
+    </div>`;
+  }).join('');
+  document.getElementById('overlay').classList.add('show');
+}
+
+function addFromOverlay(name,dk){
+  if(!shoppingList.find(i=>i.name===name)) shoppingList.push({name,deptKey:dk,done:false});
+  closeOverlay();updateBadge();renderSheet();calcFullRoute();draw();
+  showToast('✓ '+name+' – Route aktualisiert');
+}
+
+function closeOverlay(){document.getElementById('overlay').classList.remove('show');}
+function overlayBg(e){if(e.target===document.getElementById('overlay'))closeOverlay();}
+
+// ═══════════════════════════════════════════════════════════
+//  RECIPE IMPORT  (Patent §3.4: Rezeptimport)
+// ═══════════════════════════════════════════════════════════
+const RECIPE_MAP={
+  'hackfleisch':'Rinderhackfleisch','spaghetti':'Spaghetti 500g','nudeln':'Penne rigate',
+  'zwiebeln':'Zwiebeln 1kg','tomatenmark':'Tomatenmark','sahne':'Sahne 30%',
+  'käse':'Gouda jung','mozzarella':'Mozzarella','tomaten':'Tomaten Roma',
+  'paprika':'Paprika rot','karotten':'Karotten 1kg','spinat':'Babyspinat',
+  'hähnchen':'Hähnchenbrustfilet','lachs':'Lachsfilet','butter':'Butter 250g',
+  'milch':'Vollmilch 3,8%','mehl':'Weizenmehl 405','eier':'Vollmilch 3,8%',
+  'zucker':'Zucker weiß 1kg','olivenöl':'Olivenöl','ketchup':'Ketchup Heinz',
+  'reis':'Basmati Reis 1kg','joghurt':'Joghurt natur',
+};
+
+function openRecipe(){document.getElementById('recipeModal').classList.add('show');}
+function closeRecipe(){document.getElementById('recipeModal').classList.remove('show');}
+
+function importRecipe(){
+  const txt=document.getElementById('recipeText').value.toLowerCase();
+  const added=[];
+  for(const[key,prod] of Object.entries(RECIPE_MAP)){
+    if(txt.includes(key)&&!shoppingList.find(i=>i.name===prod)){
+      const dk=guessDept(key);
+      shoppingList.push({name:prod,deptKey:dk,done:false});
+      added.push(prod);
+    }
+  }
+  closeRecipe();
+  if(added.length){
+    updateBadge();renderSheet();calcFullRoute();draw();
+    showToast(`🍽️ ${added.length} Zutaten importiert & Route berechnet`);
+  } else {
+    showToast('Keine bekannten Zutaten erkannt.');
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+//  VOICE INPUT  (Patent §3.4: Spracherkennung)
+// ═══════════════════════════════════════════════════════════
+let voiceRecognition=null;
+function startVoice(){
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR){showToast('⚠️ Spracherkennung nicht verfügbar (nutze Chrome)');return;}
+  document.getElementById('voiceind').classList.add('show');
+  voiceRecognition=new SR();
+  voiceRecognition.lang='de-DE'; voiceRecognition.continuous=false; voiceRecognition.interimResults=false;
+  voiceRecognition.onresult=e=>{
+    const transcript=e.results[0][0].transcript;
+    document.getElementById('voiceTxt').textContent='Erkannt: "'+transcript+'"';
+    setTimeout(()=>{
+      stopVoice();
+      processVoice(transcript);
+    },800);
+  };
+  voiceRecognition.onerror=()=>{stopVoice();showToast('Spracherkennung fehlgeschlagen');};
+  voiceRecognition.start();
+}
+
+function stopVoice(){
+  if(voiceRecognition) voiceRecognition.stop();
+  document.getElementById('voiceind').classList.remove('show');
+  document.getElementById('voiceTxt').textContent='Spreche jetzt... z.B. "Butter und Milch"';
+}
+
+function processVoice(txt){
+  const words=txt.toLowerCase().split(/[\s,und]+/);
+  const added=[];
+  words.forEach(w=>{
+    const hit=ALL_PRODS.find(p=>p.n.toLowerCase().includes(w)||w.includes(p.n.toLowerCase().split(' ')[0]));
+    if(hit&&!shoppingList.find(i=>i.name===hit.n)){
+      shoppingList.push({name:hit.n,deptKey:hit.deptKey,done:false});
+      added.push(hit.n);
+    }
+  });
+  if(added.length){
+    updateBadge();renderSheet();calcFullRoute();draw();
+    showToast('🎙️ Hinzugefügt: '+added.join(', '));
+  } else {
+    showToast('🎙️ "'+txt+'" – nichts erkannt');
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+//  UTILS
+// ═══════════════════════════════════════════════════════════
+function guessDept(v){
+  if(['wasser','saft','bier','wein','cola','limo','energy','eistee'].some(k=>v.includes(k))) return'drinks';
+  if(['milch','butter','käse','joghurt','sahne','quark','mozzarella','skyr','frischkäse','kefir','molke'].some(k=>v.includes(k))) return'dairy';
+  if(['nudel','pasta','spaghetti','penne','reis','mehl','zucker','schoko','lindt','cornflakes','hafer','ketchup','tomatenmark','olivenöl'].some(k=>v.includes(k))) return'food';
+  if(['spülmittel','waschmittel','shampoo','zahnpasta','küchenpapier','müllbeutel','duschmittel','handseife'].some(k=>v.includes(k))) return'household';
+  if(['apfel','äpfel','banane','tomate','gurke','karotte','spinat','paprika','zwiebel','obst','gemüse','salat'].some(k=>v.includes(k))) return'produce';
+  if(['fleisch','hähnchen','lachs','fisch','garnelen','hackfleisch','steak','wurst','put','schwein'].some(k=>v.includes(k))) return'meat';
+  if(['brot','brötchen','baguette','croissant','brezel','kuchen','backware'].some(k=>v.includes(k))) return'bakery';
+  if(['pizza','tiefkühl','tk','pommes','erbsen','edamame','eis'].some(k=>v.includes(k))) return'freezer';
+  return'food';
+}
+
+function showToast(msg){
+  const t=document.getElementById('toast');
+  const el=document.createElement('div');el.className='ti';el.innerHTML=msg;
+  t.appendChild(el);setTimeout(()=>el.remove(),3200);
+}
+
+// ═══════════════════════════════════════════════════════════
+//  AUTO BEACON SIMULATION  (removes when real BLE available)
+// ═══════════════════════════════════════════════════════════
+const SIM=['eingang','gangB','gangA','produce','meat','gangC','gangD','gangTK','kasse'];
+let si=0;
+function simStep(){
+  if(si>=SIM.length) return;
+  setZone(SIM[si++]);
+  setTimeout(simStep,9000);
+}
+
+// ═══════════════════════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════════════════════
+window.addEventListener('resize',()=>resize());
+resize();
+updateCongestion();
+setZone('eingang');
+calcFullRoute();
+updateBadge();
+renderSheet();
+setTimeout(simStep,2000);
+
+// Update congestion every 30 seconds (Patent: Aktualisierungsrate)
+setInterval(updateCongestion,30000);
+</script>
+</body>
+</html>

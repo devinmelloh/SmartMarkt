@@ -1,0 +1,1394 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#ffffff">
+<title>SmartMarkt</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F4F6FA; --card:#FFFFFF; --card2:#F9FAFC; --s3:#EEF1F8;
+  --bdr:rgba(0,0,0,0.07); --bdr2:rgba(0,0,0,0.12); --bdr3:rgba(0,0,0,0.18);
+  --t1:#1A2035; --t2:#5A6A85; --t3:#9AAAC0;
+  --g:#00A882; --g2:#007F65; --gbg:#E6F7F3; --gbdr:rgba(0,168,130,0.3);
+  --bl:#2563EB; --blbg:#EFF6FF; --bldark:#1D4ED8;
+  --am:#D97706; --ambg:#FEF3C7; --amdr:rgba(217,119,6,0.3);
+  --rd:#DC2626; --rdbg:#FEE2E2; --rddr:rgba(220,38,38,0.25);
+  --yw:#B45309;
+  --biz:#4F46E5; --bizbg:#EEF2FF; --bizbdr:rgba(79,70,229,0.25);
+  --r:14px; --rsm:9px; --rxs:5px;
+  --f:'DM Sans',-apple-system,sans-serif; --mono:'DM Mono',monospace;
+  --shadow:0 1px 4px rgba(0,0,0,0.08),0 2px 12px rgba(0,0,0,0.05);
+  --shadow-md:0 4px 16px rgba(0,0,0,0.1),0 1px 4px rgba(0,0,0,0.06);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-family:var(--f);color:var(--t1);}
+button,input,select,textarea{font-family:var(--f);}
+button{cursor:pointer;border:none;background:none;color:inherit;}
+.screen{position:absolute;inset:0;display:none;flex-direction:column;overflow:hidden;background:var(--bg);}
+.screen.active{display:flex;}
+
+/* ════ ROLE SCREEN ════ */
+#roleScreen{align-items:center;justify-content:center;padding:32px 24px;background:#fff;}
+.rl-logo{width:72px;height:72px;background:var(--g);border-radius:20px;display:flex;align-items:center;justify-content:center;font-size:36px;margin-bottom:16px;box-shadow:0 8px 24px rgba(0,168,130,0.3);}
+.rl-name{font-size:28px;font-weight:700;letter-spacing:-.8px;color:var(--t1);margin-bottom:4px;}
+.rl-tag{font-size:14px;color:var(--t2);margin-bottom:44px;}
+.rl-cards{display:flex;flex-direction:column;gap:12px;width:100%;max-width:340px;}
+.rl-card{border-radius:18px;padding:20px;cursor:pointer;display:flex;align-items:center;gap:15px;border:1.5px solid var(--bdr);background:var(--card);box-shadow:var(--shadow);transition:all .18s;}
+.rl-card:active{transform:scale(.97);}
+.rl-card.c{border-color:var(--gbdr);}
+.rl-card.b{border-color:var(--bizbdr);}
+.rci{width:48px;height:48px;border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0;}
+.rl-card.c .rci{background:var(--gbg);}
+.rl-card.b .rci{background:var(--bizbg);}
+.rct{font-size:16px;font-weight:600;color:var(--t1);}
+.rcs{font-size:12px;color:var(--t2);margin-top:2px;}
+.rca{font-size:22px;color:var(--t3);margin-left:auto;}
+
+/* ════ TOP BAR ════ */
+.topbar{flex-shrink:0;padding:max(env(safe-area-inset-top),14px) 16px 12px;background:#fff;border-bottom:1px solid var(--bdr);display:flex;align-items:center;gap:10px;box-shadow:0 1px 0 var(--bdr);}
+.tb-back{width:34px;height:34px;background:var(--bg);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;cursor:pointer;border:1px solid var(--bdr);color:var(--t2);}
+.tb-main{flex:1;min-width:0;}
+.tb-title{font-size:15px;font-weight:600;color:var(--t1);}
+.tb-sub{font-size:11px;color:var(--t2);margin-top:1px;}
+.tb-action{min-width:34px;height:34px;background:var(--bg);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:15px;cursor:pointer;border:1px solid var(--bdr);position:relative;padding:0 8px;}
+.tb-badge{position:absolute;top:-4px;right:-4px;background:var(--g);color:#fff;font-size:8px;font-weight:700;width:15px;height:15px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:2px solid #fff;}
+
+/* ════ STORE SCREEN ════ */
+#storeScreen{background:var(--bg);}
+.store-list{flex:1;overflow-y:auto;padding:12px 16px 20px;display:flex;flex-direction:column;gap:9px;}
+.store-card{background:var(--card);border:1.5px solid var(--bdr);border-radius:18px;padding:14px;display:flex;align-items:center;gap:13px;cursor:pointer;box-shadow:var(--shadow);transition:all .15s;}
+.store-card:active{transform:scale(.98);opacity:.85;}
+.sc-logo{width:52px;height:52px;border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:26px;flex-shrink:0;font-weight:700;}
+.sc-name{font-size:15px;font-weight:600;}
+.sc-addr{font-size:12px;color:var(--t2);margin-top:2px;}
+.sc-chips{display:flex;gap:5px;margin-top:6px;flex-wrap:wrap;}
+.sc-chip{font-size:10px;font-weight:600;padding:2px 8px;border-radius:8px;}
+.open{background:var(--gbg);color:var(--g2);}
+.closed{background:var(--rdbg);color:var(--rd);}
+.deal{background:var(--ambg);color:var(--am);}
+.sc-dist{font-size:11px;color:var(--t2);margin-top:4px;}
+.sc-arrow{font-size:20px;color:var(--t3);}
+
+/* ════ CUSTOMER APP ════ */
+#custApp{background:var(--bg);}
+.ctabs{flex-shrink:0;display:flex;background:#fff;border-bottom:1px solid var(--bdr);}
+.ctab{flex:1;display:flex;flex-direction:column;align-items:center;padding:9px 4px 7px;cursor:pointer;border-bottom:2.5px solid transparent;color:var(--t3);gap:2px;transition:all .15s;}
+.ctab.on{color:var(--g);border-bottom-color:var(--g);}
+.ctab-ico{font-size:19px;}
+.ctab-lbl{font-size:10px;font-weight:600;}
+.cpanel{flex:1;overflow-y:auto;overflow-x:hidden;display:none;flex-direction:column;min-height:0;}
+.cpanel.on{display:flex;}
+.cpanel::-webkit-scrollbar{display:none;}
+
+/* ── ANGEBOTE ── */
+.offers-banner{margin:12px 16px;border-radius:16px;padding:14px 16px;background:linear-gradient(135deg,#E6F7F3,#EFF6FF);border:1.5px solid var(--gbdr);display:flex;align-items:center;gap:12px;}
+.ob-left{flex:1;}
+.ob-title{font-size:16px;font-weight:700;color:var(--t1);}
+.ob-sub{font-size:12px;color:var(--t2);margin-top:2px;}
+.ob-badge{background:var(--g);color:#fff;font-size:13px;font-weight:700;padding:6px 14px;border-radius:20px;flex-shrink:0;}
+
+.cat-scroll{display:flex;gap:7px;padding:4px 16px 10px;overflow-x:auto;scrollbar-width:none;}
+.cat-scroll::-webkit-scrollbar{display:none;}
+.cat-chip{flex-shrink:0;padding:7px 14px;border-radius:20px;font-size:13px;font-weight:500;background:var(--card);border:1.5px solid var(--bdr);color:var(--t1);cursor:pointer;transition:all .15s;white-space:nowrap;box-shadow:0 1px 3px rgba(0,0,0,0.06);}
+.cat-chip.on{background:var(--g);border-color:var(--g);color:#fff;box-shadow:0 3px 10px rgba(0,168,130,0.3);}
+.cat-chip:active{transform:scale(.96);}
+
+.offers-list{padding:0 16px 16px;display:flex;flex-direction:column;gap:9px;}
+.offer-row{background:var(--card);border:1.5px solid var(--bdr);border-radius:var(--r);padding:12px;display:flex;gap:11px;align-items:center;box-shadow:var(--shadow);cursor:pointer;transition:all .15s;}
+.offer-row:active{transform:scale(.98);}
+.or-img{width:50px;height:50px;border-radius:11px;background:var(--bg);display:flex;align-items:center;justify-content:center;font-size:26px;flex-shrink:0;}
+.or-body{flex:1;min-width:0;}
+.or-name{font-size:14px;font-weight:600;color:var(--t1);}
+.or-dept{font-size:11px;color:var(--t2);margin-top:2px;}
+.or-pricing{display:flex;align-items:center;gap:7px;margin-top:5px;}
+.or-old{font-size:12px;color:var(--t3);text-decoration:line-through;}
+.or-new{font-size:16px;font-weight:700;color:var(--g);}
+.or-pct{font-size:10px;font-weight:700;background:var(--rdbg);color:var(--rd);border:1px solid var(--rddr);padding:2px 6px;border-radius:6px;}
+.or-add{background:var(--gbg);color:var(--g);border:1.5px solid var(--gbdr);border-radius:8px;padding:5px 11px;font-size:12px;font-weight:600;flex-shrink:0;}
+.or-add:active{background:var(--g);color:#fff;}
+
+/* ── KARTE – static schematic ── */
+.map-wrap{flex:1;padding:12px 16px;display:flex;flex-direction:column;gap:10px;min-height:0;}
+.map-title-row{display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.map-legend-row{display:flex;gap:8px;flex-wrap:wrap;flex-shrink:0;}
+.leg-item{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--t2);}
+.leg-dot{width:10px;height:10px;border-radius:3px;flex-shrink:0;}
+.map-canvas-wrap{flex:1;background:var(--card);border-radius:var(--r);border:1.5px solid var(--bdr);overflow:hidden;box-shadow:var(--shadow);min-height:0;position:relative;}
+canvas#custMap{display:block;width:100%;height:100%;}
+.map-tap-hint{position:absolute;bottom:10px;left:50%;transform:translateX(-50%);background:rgba(255,255,255,0.9);backdrop-filter:blur(4px);border:1px solid var(--bdr);border-radius:20px;padding:4px 12px;font-size:11px;color:var(--t2);white-space:nowrap;pointer-events:none;}
+
+/* ── SUCHE ── */
+.search-wrap{padding:12px 16px;display:flex;flex-direction:column;gap:10px;flex-shrink:0;}
+.search-bar{display:flex;align-items:center;gap:8px;background:var(--card);border:1.5px solid var(--bdr2);border-radius:var(--r);padding:11px 14px;box-shadow:var(--shadow);}
+.search-bar.focused{border-color:var(--g);}
+.search-bar input{flex:1;background:none;border:none;outline:none;font-size:15px;color:var(--t1);}
+.search-bar input::placeholder{color:var(--t3);}
+.sb-mic{font-size:18px;color:var(--t2);cursor:pointer;padding:2px;}
+.search-results{padding:0 16px;display:flex;flex-direction:column;gap:7px;}
+.sr-row{background:var(--card);border:1.5px solid var(--bdr);border-radius:var(--r);padding:11px 13px;display:flex;align-items:center;gap:10px;box-shadow:var(--shadow);cursor:pointer;}
+.sr-row:active{opacity:.75;}
+.sr-ico{font-size:22px;flex-shrink:0;}
+.sr-body{flex:1;min-width:0;}
+.sr-name{font-size:14px;font-weight:500;color:var(--t1);}
+.sr-dept{font-size:11px;color:var(--t2);margin-top:1px;}
+.sr-shelf{background:var(--gbg);color:var(--g2);border:1px solid var(--gbdr);border-radius:6px;font-size:11px;font-weight:600;padding:3px 8px;flex-shrink:0;font-family:var(--mono);}
+.sr-add{background:var(--gbg);color:var(--g);border:1.5px solid var(--gbdr);border-radius:7px;font-size:11px;font-weight:600;padding:4px 10px;flex-shrink:0;}
+.srcat-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:0 16px;}
+.srcat{background:var(--card);border:1.5px solid var(--bdr);border-radius:var(--r);padding:12px;cursor:pointer;box-shadow:var(--shadow);display:flex;align-items:center;gap:10px;transition:all .15s;}
+.srcat:active{transform:scale(.97);}
+.srcat-ico{font-size:24px;}
+.srcat-name{font-size:13px;font-weight:600;color:var(--t1);}
+.srcat-count{font-size:10px;color:var(--t2);margin-top:1px;}
+
+/* ── EINKAUFSZETTEL ── */
+.list-header{display:flex;align-items:center;justify-content:space-between;padding:12px 16px 8px;flex-shrink:0;}
+.lh-title{font-size:15px;font-weight:700;color:var(--t1);}
+.lh-acts{display:flex;gap:6px;}
+.lh-btn{font-size:12px;font-weight:500;padding:5px 11px;border-radius:9px;border:1.5px solid var(--bdr);color:var(--t2);background:var(--card);cursor:pointer;}
+.lh-btn.primary{color:var(--g);border-color:var(--gbdr);background:var(--gbg);}
+
+/* Route banner */
+.route-banner{margin:0 16px 10px;background:linear-gradient(135deg,var(--gbg),#EFF6FF);border:1.5px solid var(--gbdr);border-radius:var(--r);padding:12px 14px;display:flex;align-items:center;gap:12px;cursor:pointer;box-shadow:0 2px 8px rgba(0,168,130,0.15);transition:all .15s;}
+.route-banner:active{transform:scale(.98);}
+.rb-ico{width:40px;height:40px;background:var(--g);border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;box-shadow:0 3px 10px rgba(0,168,130,0.3);}
+.rb-text{flex:1;}
+.rb-title{font-size:14px;font-weight:700;color:var(--t1);}
+.rb-sub{font-size:11px;color:var(--t2);margin-top:2px;}
+.rb-arrow{font-size:20px;color:var(--g);}
+
+/* Recipe shortcut */
+.recipe-shortcut{margin:0 16px 10px;background:var(--card);border:1.5px dashed var(--bdr2);border-radius:var(--r);padding:11px 14px;display:flex;align-items:center;gap:11px;cursor:pointer;transition:all .15s;}
+.recipe-shortcut:active{opacity:.75;}
+.rsh-ico{font-size:22px;}
+.rsh-text{flex:1;}
+.rsh-title{font-size:13px;font-weight:600;color:var(--t1);}
+.rsh-sub{font-size:11px;color:var(--t2);margin-top:1px;}
+.rsh-arr{font-size:18px;color:var(--t3);}
+
+.list-items{flex:1;overflow-y:auto;padding:0 16px;min-height:0;}
+.list-items::-webkit-scrollbar{display:none;}
+.li{display:flex;align-items:center;gap:9px;padding:9px 0;border-bottom:1px solid var(--bdr);}
+.li:last-child{border-bottom:none;}
+.li.done .li-name{text-decoration:line-through;color:var(--t3);}
+.li-seq{width:20px;height:20px;border-radius:50%;background:var(--s3);font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;color:var(--t2);flex-shrink:0;font-family:var(--mono);}
+.li-seq.active{background:var(--g);color:#fff;}
+.li-cb{width:22px;height:22px;border:2px solid var(--bdr2);border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0;cursor:pointer;font-size:11px;transition:all .15s;}
+.li.done .li-cb{background:var(--g);border-color:var(--g);color:#fff;}
+.li-body{flex:1;min-width:0;}
+.li-name{font-size:13px;font-weight:500;color:var(--t1);}
+.li-dept{font-size:10px;color:var(--t2);margin-top:1px;}
+.li-del{font-size:16px;color:var(--t3);cursor:pointer;padding:3px;flex-shrink:0;}
+
+.list-add{display:flex;gap:8px;padding:10px 16px;border-top:1px solid var(--bdr);background:#fff;flex-shrink:0;}
+.li-inp{flex:1;background:var(--bg);border:1.5px solid var(--bdr2);border-radius:var(--rsm);padding:9px 12px;font-size:14px;color:var(--t1);outline:none;}
+.li-inp:focus{border-color:var(--g);}
+.li-add-btn{background:var(--g);color:#fff;border-radius:var(--rsm);padding:9px 16px;font-size:18px;font-weight:700;}
+
+/* ── ROUTE MODAL ── */
+.route-steps{display:flex;flex-direction:column;gap:6px;margin-bottom:14px;}
+.rs{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:var(--rsm);background:var(--bg);}
+.rs.active{background:var(--gbg);border:1px solid var(--gbdr);}
+.rs.done{opacity:.5;}
+.rs.kasse{background:var(--blbg);}
+.rs-num{width:26px;height:26px;border-radius:50%;background:var(--card);border:2px solid var(--bdr2);font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;font-family:var(--mono);flex-shrink:0;}
+.rs.active .rs-num{background:var(--g);border-color:var(--g);color:#fff;}
+.rs.kasse .rs-num{background:var(--bl);border-color:var(--bl);color:#fff;}
+.rs-ico{font-size:18px;flex-shrink:0;}
+.rs-body{flex:1;}
+.rs-name{font-size:13px;font-weight:600;}
+.rs.active .rs-name{color:var(--g);}
+.rs-shelf{font-size:11px;color:var(--t2);margin-top:1px;}
+.route-start-btn{width:100%;background:var(--g);color:#fff;border-radius:var(--r);padding:14px;font-size:15px;font-weight:700;box-shadow:0 4px 14px rgba(0,168,130,0.35);margin-bottom:8px;}
+.route-close-btn{width:100%;background:var(--bg);color:var(--t1);border-radius:var(--r);padding:12px;font-size:14px;font-weight:500;border:1.5px solid var(--bdr);}
+
+/* ════ REZEPTBUCH ════ */
+.recipe-tabs-row{display:flex;gap:6px;padding:12px 16px 8px;flex-shrink:0;}
+.rtab{flex:1;padding:8px;border-radius:var(--rsm);font-size:12px;font-weight:600;text-align:center;cursor:pointer;border:1.5px solid var(--bdr);background:var(--card);color:var(--t2);transition:all .15s;}
+.rtab.on{background:var(--g);border-color:var(--g);color:#fff;box-shadow:0 3px 10px rgba(0,168,130,0.25);}
+.rpanel{display:none;flex-direction:column;flex:1;min-height:0;overflow-y:auto;}
+.rpanel.on{display:flex;}
+.rpanel::-webkit-scrollbar{display:none;}
+
+.recipe-card{background:var(--card);border:1.5px solid var(--bdr);border-radius:var(--r);margin:0 16px 9px;box-shadow:var(--shadow);overflow:hidden;cursor:pointer;transition:all .15s;}
+.recipe-card:active{transform:scale(.98);}
+.rc-hero{height:130px;display:flex;align-items:center;justify-content:center;font-size:64px;position:relative;}
+.rc-author{position:absolute;bottom:8px;left:10px;background:rgba(255,255,255,0.92);backdrop-filter:blur(4px);border-radius:20px;padding:3px 9px;font-size:10px;font-weight:600;color:var(--t1);}
+.rc-rating{position:absolute;bottom:8px;right:10px;background:rgba(255,255,255,0.92);border-radius:20px;padding:3px 9px;font-size:10px;font-weight:600;color:var(--am);}
+.rc-body{padding:12px;}
+.rc-title{font-size:14px;font-weight:700;color:var(--t1);}
+.rc-meta{display:flex;gap:10px;margin-top:5px;flex-wrap:wrap;}
+.rc-tag{font-size:10px;color:var(--t2);display:flex;align-items:center;gap:3px;}
+.rc-footer{display:flex;align-items:center;justify-content:space-between;margin-top:10px;}
+.rc-ingr{font-size:11px;color:var(--t2);}
+.rc-add{background:var(--gbg);color:var(--g);border:1.5px solid var(--gbdr);border-radius:8px;padding:6px 14px;font-size:12px;font-weight:600;}
+.rc-add:active{background:var(--g);color:#fff;}
+
+/* Publish form */
+.pub-form{margin:0 16px;background:var(--card);border:1.5px solid var(--bdr);border-radius:var(--r);padding:14px;box-shadow:var(--shadow);}
+.pf-title{font-size:14px;font-weight:700;margin-bottom:12px;}
+.pf-inp{width:100%;background:var(--bg);border:1.5px solid var(--bdr2);border-radius:var(--rsm);padding:9px 12px;font-size:14px;color:var(--t1);outline:none;margin-bottom:8px;}
+.pf-inp:focus{border-color:var(--g);}
+.pf-row{display:flex;gap:8px;margin-bottom:8px;}
+.pf-sel{flex:1;background:var(--bg);border:1.5px solid var(--bdr2);border-radius:var(--rsm);padding:9px 12px;font-size:14px;color:var(--t1);outline:none;}
+.pf-ta{width:100%;background:var(--bg);border:1.5px solid var(--bdr2);border-radius:var(--rsm);padding:9px 12px;font-size:13px;color:var(--t1);outline:none;resize:none;height:80px;margin-bottom:8px;line-height:1.5;}
+.pf-submit{width:100%;background:var(--g);color:#fff;border-radius:var(--rsm);padding:11px;font-size:14px;font-weight:700;}
+
+/* ════ BUSINESS ════ */
+#bizApp{background:var(--bg);}
+.btabs{flex-shrink:0;display:flex;background:#fff;border-bottom:1px solid var(--bdr);}
+.btab{flex:1;display:flex;flex-direction:column;align-items:center;padding:9px 4px 7px;cursor:pointer;border-bottom:2.5px solid transparent;color:var(--t3);gap:2px;transition:all .15s;}
+.btab.on{color:var(--biz);border-bottom-color:var(--biz);}
+.btab-ico{font-size:18px;}
+.btab-lbl{font-size:10px;font-weight:600;}
+.bpanel{flex:1;overflow-y:auto;display:none;flex-direction:column;padding:14px 16px 20px;min-height:0;}
+.bpanel.on{display:flex;}
+.bpanel::-webkit-scrollbar{display:none;}
+
+.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;}
+.stat{background:var(--card);border:1.5px solid var(--bdr);border-radius:var(--r);padding:13px;box-shadow:var(--shadow);}
+.stat-lbl{font-size:11px;color:var(--t2);margin-bottom:4px;}
+.stat-val{font-size:26px;font-weight:700;font-family:var(--mono);letter-spacing:-.5px;color:var(--t1);}
+.stat-chg{font-size:10px;margin-top:3px;}
+.up{color:var(--g);}
+.dn{color:var(--rd);}
+
+.sec-head{display:flex;align-items:center;justify-content:space-between;margin:16px 0 8px;}
+.sec-title{font-size:14px;font-weight:700;color:var(--t1);}
+.sec-btn{font-size:12px;font-weight:500;color:var(--biz);border:1.5px solid var(--bizbdr);border-radius:8px;padding:4px 11px;cursor:pointer;background:var(--bizbg);}
+
+.biz-form{background:var(--card);border:1.5px solid var(--bdr);border-radius:var(--r);padding:14px;margin-bottom:12px;box-shadow:var(--shadow);}
+.bf-title{font-size:13px;font-weight:700;color:var(--t1);margin-bottom:10px;}
+.bf-row{display:flex;gap:7px;margin-bottom:8px;}
+.bf-inp{flex:1;background:var(--bg);border:1.5px solid var(--bdr2);border-radius:var(--rsm);padding:8px 11px;font-size:13px;color:var(--t1);outline:none;}
+.bf-inp:focus{border-color:var(--biz);}
+.bf-sel{flex:1;background:var(--bg);border:1.5px solid var(--bdr2);border-radius:var(--rsm);padding:8px 11px;font-size:13px;color:var(--t1);outline:none;}
+.bf-sub{width:100%;background:var(--biz);color:#fff;border-radius:var(--rsm);padding:10px;font-size:13px;font-weight:700;}
+
+.bo-row{background:var(--card);border:1.5px solid var(--bdr);border-radius:var(--rsm);padding:11px 12px;display:flex;align-items:center;gap:10px;margin-bottom:6px;box-shadow:var(--shadow);}
+.bo-ico{font-size:22px;flex-shrink:0;}
+.bo-body{flex:1;min-width:0;}
+.bo-name{font-size:13px;font-weight:600;color:var(--t1);}
+.bo-meta{font-size:11px;color:var(--t2);margin-top:1px;}
+.bo-price{font-size:14px;font-weight:700;color:var(--g);flex-shrink:0;}
+.bo-btns{display:flex;gap:4px;flex-shrink:0;}
+.bo-edit{font-size:11px;color:var(--biz);border:1px solid var(--bizbdr);border-radius:5px;padding:3px 7px;cursor:pointer;}
+.bo-del{font-size:11px;color:var(--rd);border:1px solid var(--rddr);border-radius:5px;padding:3px 7px;cursor:pointer;}
+
+.prod-row{background:var(--card);border:1.5px solid var(--bdr);border-radius:var(--rsm);padding:9px 12px;display:flex;align-items:center;gap:9px;margin-bottom:5px;}
+.pr-ico{font-size:18px;flex-shrink:0;}
+.pr-name{font-size:13px;font-weight:500;flex:1;}
+.pr-shelf{font-size:11px;font-family:var(--mono);color:var(--g2);background:var(--gbg);padding:2px 7px;border-radius:6px;}
+
+/* OVERLAYS */
+#overlay{position:fixed;inset:0;background:rgba(0,0,0,0.45);backdrop-filter:blur(4px);z-index:200;display:none;align-items:flex-end;justify-content:center;}
+#overlay.show{display:flex;}
+.modal{background:#fff;border-radius:22px 22px 0 0;width:100%;max-width:430px;padding:18px 18px max(env(safe-area-inset-bottom),22px);animation:mup .3s cubic-bezier(.34,1.1,.64,1);}
+@keyframes mup{from{transform:translateY(100%)}to{transform:none}}
+.mo-handle{width:36px;height:4px;background:var(--bdr2);border-radius:2px;margin:0 auto 16px;}
+.mo-title{font-size:17px;font-weight:700;color:var(--t1);margin-bottom:14px;}
+.mo-close{width:100%;background:var(--bg);color:var(--t1);border-radius:var(--rsm);padding:12px;font-size:14px;font-weight:500;border:1.5px solid var(--bdr);margin-top:8px;}
+
+/* Recipe import in modal */
+.drop-zone{background:var(--bg);border:2px dashed var(--bdr2);border-radius:var(--r);padding:22px;text-align:center;margin-bottom:10px;cursor:pointer;transition:border-color .15s;}
+.drop-zone:hover,.drop-zone.over{border-color:var(--g);}
+.dz-ico{font-size:34px;margin-bottom:7px;}
+.dz-title{font-size:14px;font-weight:600;color:var(--t1);}
+.dz-sub{font-size:12px;color:var(--t2);margin-top:2px;}
+.or-divider{text-align:center;font-size:12px;color:var(--t3);margin:8px 0;}
+.mo-ta{width:100%;background:var(--bg);border:1.5px solid var(--bdr2);border-radius:var(--rsm);padding:10px;font-size:13px;color:var(--t1);outline:none;resize:none;height:88px;line-height:1.5;margin-bottom:8px;}
+.mo-ta:focus{border-color:var(--g);}
+.import-btn{width:100%;background:var(--g);color:#fff;border-radius:var(--rsm);padding:13px;font-size:14px;font-weight:700;margin-bottom:6px;}
+#fileInput{display:none;}
+
+/* Toast */
+#toast{position:fixed;bottom:calc(env(safe-area-inset-bottom)+76px);left:50%;transform:translateX(-50%);z-index:300;pointer-events:none;display:flex;flex-direction:column;align-items:center;gap:5px;}
+.ti{background:var(--t1);color:#fff;border-radius:20px;padding:10px 18px;font-size:13px;font-weight:500;white-space:nowrap;box-shadow:var(--shadow-md);animation:tin .25s ease,tout .25s ease 2.5s forwards;}
+@keyframes tin{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+@keyframes tout{to{opacity:0;transform:translateY(6px)}}
+
+/* Voice overlay */
+#voiceOv{position:fixed;inset:0;background:rgba(255,255,255,.92);backdrop-filter:blur(6px);z-index:250;display:none;align-items:center;justify-content:center;flex-direction:column;gap:16px;}
+#voiceOv.show{display:flex;}
+.vo-ring{width:84px;height:84px;border-radius:50%;background:var(--rdbg);border:3px solid var(--rd);display:flex;align-items:center;justify-content:center;font-size:40px;animation:vor 1s infinite;}
+@keyframes vor{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
+.vo-txt{font-size:14px;font-weight:500;color:var(--t2);}
+</style>
+</head>
+<body>
+
+<!-- ROLE -->
+<div id="roleScreen" class="screen active">
+  <div class="rl-logo">🛒</div>
+  <div class="rl-name">SmartMarkt</div>
+  <div class="rl-tag">KI-gestützte Supermarkt-Navigation</div>
+  <div class="rl-cards">
+    <div class="rl-card c" onclick="showScreen('storeScreen');renderStores()">
+      <div class="rci">👤</div>
+      <div><div class="rct">Kundenansicht</div><div class="rcs">Markt wählen, einkaufen & navigieren</div></div>
+      <div class="rca">›</div>
+    </div>
+    <div class="rl-card b" onclick="openBusiness()">
+      <div class="rci">🏢</div>
+      <div><div class="rct">Geschäftsansicht</div><div class="rcs">Angebote & Produkte verwalten</div></div>
+      <div class="rca">›</div>
+    </div>
+  </div>
+</div>
+
+<!-- STORE SELECTION -->
+<div id="storeScreen" class="screen">
+  <div class="topbar">
+    <div class="tb-back" onclick="showScreen('roleScreen')">‹</div>
+    <div class="tb-main"><div class="tb-title">Markt wählen</div><div class="tb-sub">Sulingen & Umgebung</div></div>
+  </div>
+  <div style="padding:10px 16px 0;flex-shrink:0;">
+    <div class="search-bar" style="margin-bottom:0;">
+      <span style="font-size:14px;color:var(--t3)">🔍</span>
+      <input type="text" placeholder="Markt oder Stadt suchen..." oninput="filterStores(this.value)">
+    </div>
+  </div>
+  <div style="font-size:11px;font-weight:600;color:var(--t2);padding:12px 16px 4px;text-transform:uppercase;letter-spacing:.5px;">In deiner Nähe</div>
+  <div class="store-list" id="storeList"></div>
+</div>
+
+<!-- CUSTOMER APP -->
+<div id="custApp" class="screen">
+  <div class="topbar">
+    <div class="tb-back" onclick="showScreen('storeScreen')">‹</div>
+    <div class="tb-main">
+      <div class="tb-title" id="cStoreName">–</div>
+      <div class="tb-sub" id="cStoreAddr">–</div>
+    </div>
+    <div class="tb-action" onclick="switchCTab('list')">🛒<div class="tb-badge" id="cartBadge">0</div></div>
+  </div>
+
+  <div class="ctabs">
+    <div class="ctab on" data-t="offers" onclick="switchCTab('offers')"><div class="ctab-ico">🏷️</div><div class="ctab-lbl">Angebote</div></div>
+    <div class="ctab" data-t="map" onclick="switchCTab('map')"><div class="ctab-ico">🗺️</div><div class="ctab-lbl">Karte</div></div>
+    <div class="ctab" data-t="search" onclick="switchCTab('search')"><div class="ctab-ico">🔍</div><div class="ctab-lbl">Suchen</div></div>
+    <div class="ctab" data-t="list" onclick="switchCTab('list')"><div class="ctab-ico">📋</div><div class="ctab-lbl">Einkaufszettel</div></div>
+    <div class="ctab" data-t="recipes" onclick="switchCTab('recipes')"><div class="ctab-ico">🍽️</div><div class="ctab-lbl">Rezepte</div></div>
+  </div>
+
+  <!-- ANGEBOTE -->
+  <div class="cpanel on" id="cp-offers">
+    <div class="offers-banner">
+      <div class="ob-left"><div class="ob-title">Diese Woche im Angebot</div><div class="ob-sub">Nur noch bis Samstag · <span id="offerCountTxt">12 Angebote</span></div></div>
+      <div class="ob-badge" id="obBadge">12</div>
+    </div>
+    <div class="cat-scroll" id="offerCats"></div>
+    <div class="offers-list" id="offersList"></div>
+  </div>
+
+  <!-- KARTE -->
+  <div class="cpanel" id="cp-map">
+    <div class="map-wrap">
+      <div class="map-title-row">
+        <div style="font-size:14px;font-weight:700;color:var(--t1);" id="mapStoreName">Lageplan</div>
+        <div style="font-size:12px;color:var(--t2);">Tippe auf ein Regal</div>
+      </div>
+      <div class="map-legend-row">
+        <div class="leg-item"><div class="leg-dot" style="background:#1D9E75"></div>A Getränke</div>
+        <div class="leg-item"><div class="leg-dot" style="background:#2563EB"></div>B Molkerei</div>
+        <div class="leg-item"><div class="leg-dot" style="background:#D97706"></div>C Lebensmittel</div>
+        <div class="leg-item"><div class="leg-dot" style="background:#9333EA"></div>D Haushalt</div>
+        <div class="leg-item"><div class="leg-dot" style="background:#06B6D4"></div>TK</div>
+      </div>
+      <div class="map-canvas-wrap">
+        <canvas id="custMap"></canvas>
+        <div class="map-tap-hint">Auf Abteilung tippen für Details</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SUCHE -->
+  <div class="cpanel" id="cp-search">
+    <div class="search-wrap">
+      <div class="search-bar" id="bigSB">
+        <span style="font-size:16px;color:var(--t3)">🔍</span>
+        <input id="bigSearch" type="text" placeholder="Artikel suchen, z.B. Butter..."
+          oninput="doSearch(this.value)"
+          onkeydown="if(event.key==='Enter')searchEnter()"
+          onfocus="document.getElementById('bigSB').classList.add('focused')"
+          onblur="document.getElementById('bigSB').classList.remove('focused')">
+        <span class="sb-mic" onclick="startVoice()">🎙️</span>
+      </div>
+    </div>
+    <div id="srList" style="padding:0 16px;display:flex;flex-direction:column;gap:7px;"></div>
+    <div style="padding:4px 16px 8px;font-size:11px;font-weight:600;color:var(--t2);text-transform:uppercase;letter-spacing:.4px;" id="srCatLabel">Alle Abteilungen</div>
+    <div class="srcat-grid" id="srCats"></div>
+  </div>
+
+  <!-- EINKAUFSZETTEL -->
+  <div class="cpanel" id="cp-list" style="overflow:hidden;">
+    <div class="list-header">
+      <div class="lh-title">Einkaufszettel</div>
+      <div class="lh-acts">
+        <div class="lh-btn" onclick="clearDone()">Erledigte löschen</div>
+      </div>
+    </div>
+
+    <!-- Route Button -->
+    <div class="route-banner" onclick="openRouteModal()">
+      <div class="rb-ico">🧭</div>
+      <div class="rb-text">
+        <div class="rb-title">Optimierte Route starten</div>
+        <div class="rb-sub" id="routeBannerSub">Route für alle offenen Artikel berechnen</div>
+      </div>
+      <div class="rb-arrow">›</div>
+    </div>
+
+    <!-- Recipe shortcut -->
+    <div class="recipe-shortcut" onclick="switchCTab('recipes')">
+      <div class="rsh-ico">🍽️</div>
+      <div class="rsh-text">
+        <div class="rsh-title">Rezeptbuch öffnen</div>
+        <div class="rsh-sub">Internet-Rezepte, Community & eigene Rezepte</div>
+      </div>
+      <div class="rsh-arr">›</div>
+    </div>
+
+    <div class="list-items" id="listItems"></div>
+    <div class="list-add">
+      <input class="li-inp" id="listInp" placeholder="Artikel hinzufügen..." onkeydown="if(event.key==='Enter')addListItem()">
+      <button class="li-add-btn" onclick="addListItem()">+</button>
+    </div>
+  </div>
+
+  <!-- REZEPTE -->
+  <div class="cpanel" id="cp-recipes" style="overflow:hidden;flex-direction:column;">
+    <div style="padding:12px 16px 0;flex-shrink:0;">
+      <div style="font-size:16px;font-weight:700;color:var(--t1);margin-bottom:4px;">Rezeptbuch</div>
+      <div style="font-size:12px;color:var(--t2);">Wähle ein Rezept und füge die Zutaten zum Einkaufszettel hinzu</div>
+    </div>
+    <div class="recipe-tabs-row" id="recipeTabs">
+      <div class="rtab on" data-rt="internet" onclick="switchRTab('internet',this)">🌐 Internet</div>
+      <div class="rtab" data-rt="community" onclick="switchRTab('community',this)">👥 Community</div>
+      <div class="rtab" data-rt="mine" onclick="switchRTab('mine',this)">⭐ Meine</div>
+      <div class="rtab" data-rt="publish" onclick="switchRTab('publish',this)">+ Veröffentlichen</div>
+    </div>
+    <div id="rp-internet" class="rpanel on" style="padding-top:6px;"></div>
+    <div id="rp-community" class="rpanel" style="padding-top:6px;"></div>
+    <div id="rp-mine" class="rpanel" style="padding-top:6px;padding:16px;"></div>
+    <div id="rp-publish" class="rpanel" style="padding:12px 0 0;"></div>
+  </div>
+</div>
+
+<!-- BUSINESS APP -->
+<div id="bizApp" class="screen">
+  <div class="topbar">
+    <div class="tb-back" onclick="showScreen('roleScreen')">‹</div>
+    <div class="tb-main"><div class="tb-title">SmartMarkt Business</div><div class="tb-sub" id="bizStoreName">REWE Stadtmitte</div></div>
+    <div style="font-size:10px;font-weight:700;background:var(--bizbg);color:var(--biz);border:1.5px solid var(--bizbdr);border-radius:7px;padding:3px 9px;">ADMIN</div>
+  </div>
+  <div class="btabs">
+    <div class="btab on" data-bt="dash" onclick="switchBTab('dash',this)"><div class="btab-ico">📊</div><div class="btab-lbl">Dashboard</div></div>
+    <div class="btab" data-bt="boffers" onclick="switchBTab('boffers',this)"><div class="btab-ico">🏷️</div><div class="btab-lbl">Angebote</div></div>
+    <div class="btab" data-bt="bprods" onclick="switchBTab('bprods',this)"><div class="btab-ico">📦</div><div class="btab-lbl">Produkte</div></div>
+    <div class="btab" data-bt="bmap" onclick="switchBTab('bmap',this)"><div class="btab-ico">🗺️</div><div class="btab-lbl">Karte</div></div>
+  </div>
+
+  <div class="bpanel on" id="bp-dash">
+    <div class="stat-grid">
+      <div class="stat"><div class="stat-lbl">Besucher heute</div><div class="stat-val" id="sv1">0</div><div class="stat-chg up">↑ 12% vs. gestern</div></div>
+      <div class="stat"><div class="stat-lbl">App-Nutzer</div><div class="stat-val" id="sv2">0</div><div class="stat-chg up">↑ 34% diese Woche</div></div>
+      <div class="stat"><div class="stat-lbl">Aktive Angebote</div><div class="stat-val" id="sv3">12</div><div class="stat-chg" style="color:var(--am)">Bis Samstag</div></div>
+      <div class="stat"><div class="stat-lbl">Ø Verweildauer</div><div class="stat-val">23m</div><div class="stat-chg dn">↓ 5% Vorwoche</div></div>
+    </div>
+    <div class="sec-head"><div class="sec-title">Top-Artikel heute</div></div>
+    <div id="topProds"></div>
+    <div class="sec-head"><div class="sec-title">Meist genutzte Route</div></div>
+    <div style="background:var(--card);border:1.5px solid var(--bdr);border-radius:var(--r);padding:13px;box-shadow:var(--shadow);font-size:13px;color:var(--t1);line-height:1.8;">
+      Eingang → Gang B → Gang A → Gang C → Kasse<br>
+      <span style="font-size:11px;color:var(--g);font-weight:600;">↑ 38× heute · Ø 14 Minuten</span>
+    </div>
+  </div>
+
+  <div class="bpanel" id="bp-boffers">
+    <div class="biz-form">
+      <div class="bf-title">➕ Neues Angebot</div>
+      <input class="bf-inp" id="bo-name" placeholder="Produktname" style="width:100%;margin-bottom:8px;">
+      <div class="bf-row">
+        <select class="bf-sel" id="bo-cat">
+          <option value="dairy">🥛 Molkerei</option><option value="drinks">🍺 Getränke</option>
+          <option value="food">🍝 Lebensmittel</option><option value="produce">🍎 Obst & Gemüse</option>
+          <option value="meat">🥩 Fleisch & Fisch</option><option value="household">🧴 Haushalt</option>
+          <option value="bakery">🥐 Bäckerei</option><option value="freezer">❄️ Tiefkühl</option>
+        </select>
+        <input class="bf-inp" id="bo-shelf" placeholder="Regal z.B. B3" style="flex:0.6;">
+      </div>
+      <div class="bf-row">
+        <input class="bf-inp" id="bo-old" placeholder="Normalpreis €" type="number" step="0.01">
+        <input class="bf-inp" id="bo-new" placeholder="Angebotspreis €" type="number" step="0.01">
+      </div>
+      <button class="bf-sub" onclick="addBizOffer()">Angebot veröffentlichen →</button>
+    </div>
+    <div class="sec-head"><div class="sec-title">Aktive Angebote</div><div class="sec-btn" onclick="exportCSV()">CSV Export</div></div>
+    <div id="bizOfferList"></div>
+  </div>
+
+  <div class="bpanel" id="bp-bprods">
+    <div class="biz-form">
+      <div class="bf-title">➕ Produkt hinzufügen</div>
+      <input class="bf-inp" id="bp-name" placeholder="Produktname" style="width:100%;margin-bottom:8px;">
+      <div class="bf-row">
+        <select class="bf-sel" id="bp-cat">
+          <option value="dairy">Molkerei</option><option value="drinks">Getränke</option>
+          <option value="food">Lebensmittel</option><option value="produce">Obst & Gemüse</option>
+          <option value="meat">Fleisch & Fisch</option><option value="household">Haushalt</option>
+          <option value="bakery">Bäckerei</option><option value="freezer">Tiefkühl</option>
+        </select>
+        <input class="bf-inp" id="bp-shelf" placeholder="Regal" style="flex:.5;">
+      </div>
+      <button class="bf-sub" onclick="addBizProd()">Produkt speichern →</button>
+    </div>
+    <div class="sec-head"><div class="sec-title">Produktdatenbank</div><div class="sec-btn">CSV Import</div></div>
+    <div id="bizProdList"></div>
+  </div>
+
+  <div class="bpanel" id="bp-bmap">
+    <div class="sec-head" style="margin-top:0;"><div class="sec-title">Grundriss & Regalzuordnung</div></div>
+    <div style="background:var(--card);border:1.5px solid var(--bdr);border-radius:var(--r);overflow:hidden;height:240px;margin-bottom:12px;box-shadow:var(--shadow);">
+      <canvas id="bizMap" style="display:block;width:100%;height:100%;"></canvas>
+    </div>
+    <div class="sec-head"><div class="sec-title">Regalzuordnung</div></div>
+    <div style="background:var(--card);border:1.5px solid var(--bdr);border-radius:var(--r);overflow:hidden;box-shadow:var(--shadow);" id="shelfTable"></div>
+  </div>
+</div>
+
+<!-- MODAL OVERLAY -->
+<div id="overlay" onclick="if(event.target===this)closeModal()">
+  <div class="modal" id="modalBody"></div>
+</div>
+
+<input type="file" id="fileInput" accept=".txt,.pdf,.jpg,.jpeg,.png" onchange="onFileChange(this)">
+<div id="toast"></div>
+<div id="voiceOv">
+  <div class="vo-ring">🎙️</div>
+  <div class="vo-txt" id="voiceTxt">Spreche jetzt... z.B. "Butter und Milch"</div>
+  <button style="background:var(--rd);color:#fff;border-radius:20px;padding:9px 22px;font-size:13px;font-weight:600;margin-top:4px;" onclick="stopVoice()">Abbrechen</button>
+</div>
+
+<script>
+// ═══════════════════════════════════════════
+// DATA
+// ═══════════════════════════════════════════
+const STORES=[
+  {id:'rewe1',name:'REWE Stadtmitte',addr:'Hauptstraße 12, 27232 Sulingen',icon:'🛒',bg:'#FFF0F0',c:'#CC0000',open:true,dist:'0,3 km',deals:12},
+  {id:'rewe2',name:'REWE Bahnhof',addr:'Bahnhofstraße 5, 27232 Sulingen',icon:'🛒',bg:'#FFF0F0',c:'#CC0000',open:true,dist:'0,8 km',deals:8},
+  {id:'lidl1',name:'Lidl Sulingen',addr:'Bremer Straße 44, 27232 Sulingen',icon:'🏪',bg:'#FFFFF0',c:'#B8860B',open:true,dist:'1,1 km',deals:15},
+  {id:'aldi1',name:'Aldi Nord',addr:'Lange Straße 8, 27232 Sulingen',icon:'🏬',bg:'#F0F4FF',c:'#1E6EBA',open:false,dist:'1,4 km',deals:9},
+  {id:'edeka1',name:'EDEKA Frische-Center',addr:'Am Markt 3, 27232 Sulingen',icon:'🛍️',bg:'#FFF0F0',c:'#E30613',open:true,dist:'1,7 km',deals:7},
+];
+let filteredStores=[...STORES];
+let selectedStore=null;
+
+const DEPT={
+  dairy:{name:'Molkerei & Käse',icon:'🥛',color:'#2563EB',bg:'#EFF6FF'},
+  drinks:{name:'Getränke',icon:'🍺',color:'#1D9E75',bg:'#E6F7F3'},
+  food:{name:'Lebensmittel',icon:'🍝',color:'#D97706',bg:'#FEF3C7'},
+  produce:{name:'Obst & Gemüse',icon:'🍎',color:'#16A34A',bg:'#F0FDF4'},
+  meat:{name:'Fleisch & Fisch',icon:'🥩',color:'#DC2626',bg:'#FEF2F2'},
+  household:{name:'Haushalt',icon:'🧴',color:'#9333EA',bg:'#FAF5FF'},
+  bakery:{name:'Bäckerei',icon:'🥐',color:'#B45309',bg:'#FEF3C7'},
+  freezer:{name:'Tiefkühlkost',icon:'❄️',color:'#0891B2',bg:'#ECFEFF'},
+};
+
+let OFFERS=[
+  {id:1,name:'Butter 250g',dept:'dairy',icon:'🧈',old:1.89,nw:1.29,shelf:'B3',valid:'Sa 05.04.'},
+  {id:2,name:'Vollmilch 3,8%',dept:'dairy',icon:'🥛',old:1.29,nw:0.89,shelf:'B1',valid:'Sa 05.04.'},
+  {id:3,name:'Lachsfilet 300g',dept:'meat',icon:'🐟',old:6.99,nw:4.99,shelf:'FF2',valid:'Do 03.04.'},
+  {id:4,name:'Äpfel Pink Lady 1kg',dept:'produce',icon:'🍎',old:2.49,nw:1.79,shelf:'OG1',valid:'Sa 05.04.'},
+  {id:5,name:'Cola Zero 6×1,5L',dept:'drinks',icon:'🥤',old:4.99,nw:3.49,shelf:'A3',valid:'Sa 05.04.'},
+  {id:6,name:'Pils Bier 6er',dept:'drinks',icon:'🍺',old:5.49,nw:3.99,shelf:'A4',valid:'Sa 05.04.'},
+  {id:7,name:'Spaghetti 500g',dept:'food',icon:'🍝',old:1.49,nw:0.79,shelf:'C1',valid:'Di 01.04.'},
+  {id:8,name:'Fairy Spülmittel',dept:'household',icon:'🧴',old:2.29,nw:1.49,shelf:'D1',valid:'Sa 05.04.'},
+  {id:9,name:'Gouda jung 400g',dept:'dairy',icon:'🧀',old:2.99,nw:2.19,shelf:'B4',valid:'Sa 05.04.'},
+  {id:10,name:'TK-Pizza Margherita',dept:'freezer',icon:'🍕',old:2.99,nw:1.99,shelf:'TK1',valid:'Sa 05.04.'},
+  {id:11,name:'Bananen Bio 1kg',dept:'produce',icon:'🍌',old:1.99,nw:1.29,shelf:'OG1',valid:'Sa 05.04.'},
+  {id:12,name:'Croissant 4er',dept:'bakery',icon:'🥐',old:2.49,nw:1.79,shelf:'BK2',valid:'Do 03.04.'},
+];
+
+const PRODUCTS=[
+  {n:'Vollmilch 3,8%',dk:'dairy',s:'B1',i:'🥛'},{n:'Hafermilch',dk:'dairy',s:'B1',i:'🥛'},
+  {n:'Butter 250g',dk:'dairy',s:'B3',i:'🧈'},{n:'Joghurt natur',dk:'dairy',s:'B2',i:'🥛'},
+  {n:'Gouda jung',dk:'dairy',s:'B4',i:'🧀'},{n:'Mozzarella',dk:'dairy',s:'B4',i:'🧀'},
+  {n:'Sahne 30%',dk:'dairy',s:'B2',i:'🥛'},{n:'Quark mager',dk:'dairy',s:'B2',i:'🥛'},
+  {n:'Frischkäse',dk:'dairy',s:'B3',i:'🧀'},{n:'Kefir',dk:'dairy',s:'B1',i:'🥛'},
+  {n:'Wasser still 1,5L',dk:'drinks',s:'A1',i:'💧'},{n:'Cola Zero 1,5L',dk:'drinks',s:'A3',i:'🥤'},
+  {n:'Pils Bier 6er',dk:'drinks',s:'A4',i:'🍺'},{n:'Orangensaft 1L',dk:'drinks',s:'A2',i:'🍊'},
+  {n:'Rotwein Cabernet',dk:'drinks',s:'A5',i:'🍷'},{n:'Energydrink',dk:'drinks',s:'A3',i:'⚡'},
+  {n:'Spaghetti 500g',dk:'food',s:'C1',i:'🍝'},{n:'Penne rigate',dk:'food',s:'C2',i:'🍝'},
+  {n:'Basmati Reis 1kg',dk:'food',s:'C3',i:'🍚'},{n:'Zucker weiß 1kg',dk:'food',s:'C4',i:'🍬'},
+  {n:'Schokolade Vollmilch',dk:'food',s:'C5',i:'🍫'},{n:'Cornflakes',dk:'food',s:'C6',i:'🥣'},
+  {n:'Ketchup Heinz',dk:'food',s:'C7',i:'🥫'},{n:'Olivenöl',dk:'food',s:'C4',i:'🫙'},
+  {n:'Weizenmehl 405',dk:'food',s:'C1',i:'🌾'},{n:'Tomatenmark',dk:'food',s:'C7',i:'🥫'},
+  {n:'Äpfel Pink Lady',dk:'produce',s:'OG1',i:'🍎'},{n:'Bananen Bio',dk:'produce',s:'OG1',i:'🍌'},
+  {n:'Tomaten Roma',dk:'produce',s:'OG2',i:'🍅'},{n:'Gurke',dk:'produce',s:'OG2',i:'🥒'},
+  {n:'Karotten 1kg',dk:'produce',s:'OG3',i:'🥕'},{n:'Paprika rot',dk:'produce',s:'OG2',i:'🫑'},
+  {n:'Zwiebeln 1kg',dk:'produce',s:'OG4',i:'🧅'},{n:'Babyspinat',dk:'produce',s:'OG3',i:'🥬'},
+  {n:'Hähnchenbrustfilet',dk:'meat',s:'FF1',i:'🍗'},{n:'Rinderhackfleisch',dk:'meat',s:'FF1',i:'🥩'},
+  {n:'Lachsfilet',dk:'meat',s:'FF2',i:'🐟'},{n:'Garnelen TK',dk:'meat',s:'FF2',i:'🦐'},
+  {n:'Fairy Spülmittel',dk:'household',s:'D1',i:'🧴'},{n:'Ariel Pods',dk:'household',s:'D2',i:'🫧'},
+  {n:'Head & Shoulders',dk:'household',s:'D3',i:'🧴'},{n:'Zahnpasta',dk:'household',s:'D4',i:'🪥'},
+  {n:'Sauerteigbrot',dk:'bakery',s:'BK1',i:'🍞'},{n:'Croissant 4er',dk:'bakery',s:'BK2',i:'🥐'},
+  {n:'TK-Pizza Margherita',dk:'freezer',s:'TK1',i:'🍕'},{n:'TK-Erbsen',dk:'freezer',s:'TK2',i:'🫛'},
+  {n:'Vanille-Eis 1L',dk:'freezer',s:'TK3',i:'🍦'},{n:'Pommes frites',dk:'freezer',s:'TK2',i:'🍟'},
+];
+
+// ── RECIPES ──
+const INTERNET_RECIPES=[
+  {id:'ir1',title:'Spaghetti Bolognese',time:'35 min',servings:4,rating:'4.8',kcal:520,icon:'🍝',bg:'#FEF3C7',author:'Küchenchef.de',ingr:['Rinderhackfleisch','Spaghetti 500g','Tomatenmark','Zwiebeln 1kg','Olivenöl'],tags:['Pasta','Klassiker','Schnell']},
+  {id:'ir2',title:'Caesar Salad',time:'15 min',servings:2,rating:'4.6',kcal:320,icon:'🥗',bg:'#F0FDF4',author:'Tasty.de',ingr:['Babyspinat','Hähnchenbrustfilet','Gouda jung','Ketchup Heinz'],tags:['Salat','Leicht','Schnell']},
+  {id:'ir3',title:'Lachs mit Gemüse',time:'25 min',servings:2,rating:'4.9',kcal:430,icon:'🐟',bg:'#EFF6FF',author:'GutKüche.de',ingr:['Lachsfilet','Paprika rot','Karotten 1kg','Olivenöl','Butter 250g'],tags:['Fisch','Gesund','Low Carb']},
+  {id:'ir4',title:'Veggie Reis-Bowl',time:'20 min',servings:2,rating:'4.7',kcal:380,icon:'🍚',bg:'#FAF5FF',author:'VeggieWorld',ingr:['Basmati Reis 1kg','Tomaten Roma','Gurke','Babyspinat','Olivenöl'],tags:['Vegetarisch','Gesund','Schnell']},
+  {id:'ir5',title:'Bananenpfannkuchen',time:'20 min',servings:3,rating:'4.5',kcal:290,icon:'🥞',bg:'#ECFEFF',author:'Backliebe.de',ingr:['Bananen Bio','Weizenmehl 405','Sahne 30%','Butter 250g','Zucker weiß 1kg'],tags:['Frühstück','Süß','Einfach']},
+];
+
+let communityRecipes=[
+  {id:'cr1',title:'Omas Gulasch',time:'90 min',servings:6,rating:'5.0',kcal:580,icon:'🍲',bg:'#FEF2F2',author:'MaxM.',ingr:['Rinderhackfleisch','Tomatenmark','Zwiebeln 1kg','Paprika rot','Sahne 30%'],tags:['Hausmannskost','Herzhaft'],published:true},
+  {id:'cr2',title:'Schneller Nudelsalat',time:'15 min',servings:4,rating:'4.3',kcal:410,icon:'🥗',bg:'#FEF3C7',author:'SaraK.',ingr:['Penne rigate','Gurke','Tomaten Roma','Gouda jung'],tags:['Kalt','Grillen'],published:true},
+];
+
+let myRecipes=[];
+let curRTab='internet';
+
+// ── SHOPPING LIST ──
+let shoppingList=[];
+
+// ═══════════════════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════════════════
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function filterStores(v){
+  const f=v.toLowerCase();
+  filteredStores=f?STORES.filter(s=>s.name.toLowerCase().includes(f)||s.addr.toLowerCase().includes(f)):[...STORES];
+  renderStores();
+}
+
+function renderStores(){
+  document.getElementById('storeList').innerHTML=filteredStores.map(s=>`
+    <div class="store-card" onclick="pickStore('${s.id}')">
+      <div class="sc-logo" style="background:${s.bg};color:${s.c}">${s.icon}</div>
+      <div style="flex:1;">
+        <div class="sc-name">${s.name}</div>
+        <div class="sc-addr">${s.addr}</div>
+        <div class="sc-chips">
+          <span class="sc-chip ${s.open?'open':'closed'}">${s.open?'Geöffnet':'Geschlossen'}</span>
+          <span class="sc-chip deal">${s.deals} Angebote</span>
+        </div>
+        <div class="sc-dist">📍 ${s.dist}</div>
+      </div>
+      <div class="sc-arrow">›</div>
+    </div>`).join('');
+}
+
+function pickStore(id){
+  selectedStore=STORES.find(s=>s.id===id);
+  document.getElementById('cStoreName').textContent=selectedStore.name;
+  document.getElementById('cStoreAddr').textContent=selectedStore.addr;
+  document.getElementById('mapStoreName').textContent=selectedStore.name+' – Lageplan';
+  showScreen('custApp');
+  switchCTab('offers');
+}
+
+function switchCTab(t){
+  document.querySelectorAll('.ctab').forEach(x=>x.classList.toggle('on',x.dataset.t===t));
+  document.querySelectorAll('.cpanel').forEach(x=>x.classList.toggle('on',x.id==='cp-'+t));
+  if(t==='map') setTimeout(initCustMap,60);
+  if(t==='list'){renderListItems();updateRouteBannerSub();}
+  if(t==='search') renderSrCats();
+  if(t==='recipes') renderRecipes();
+  if(t==='offers') renderOffers();
+}
+
+// ═══════════════════════════════════════════
+// OFFERS
+// ═══════════════════════════════════════════
+let offerCat='all';
+function renderOffers(){
+  document.getElementById('obBadge').textContent=OFFERS.length;
+  document.getElementById('offerCountTxt').textContent=OFFERS.length+' Angebote';
+  // Cats
+  const cats=['all',...new Set(OFFERS.map(o=>o.dept))];
+  document.getElementById('offerCats').innerHTML=cats.map(c=>`
+    <div class="cat-chip ${offerCat===c?'on':''}" onclick="setOfferCat('${c}')">
+      ${c==='all'?'Alle':(DEPT[c]?.icon||'')+' '+(DEPT[c]?.name||c)}
+    </div>`).join('');
+  // List
+  const list=offerCat==='all'?OFFERS:OFFERS.filter(o=>o.dept===offerCat);
+  document.getElementById('offersList').innerHTML=list.map(o=>{
+    const save=Math.round((1-o.nw/o.old)*100);
+    return`<div class="offer-row">
+      <div class="or-img">${o.icon}</div>
+      <div class="or-body">
+        <div class="or-name">${o.name}</div>
+        <div class="or-dept">${DEPT[o.dept]?.name||o.dept} · Regal ${o.shelf} · bis ${o.valid}</div>
+        <div class="or-pricing">
+          <span class="or-old">${o.old.toFixed(2)} €</span>
+          <span class="or-new">${o.nw.toFixed(2)} €</span>
+          <span class="or-pct">−${save}%</span>
+        </div>
+      </div>
+      <div class="or-add" onclick="addToList('${o.name}','${o.dept}')">+ Liste</div>
+    </div>`;
+  }).join('');
+}
+
+function setOfferCat(c){offerCat=c;renderOffers();}
+
+// ═══════════════════════════════════════════
+// MAP – static, no drag
+// ═══════════════════════════════════════════
+const MW=20,MH=16;
+// Simplified cleaner grid
+const MGRID=[
+//  0   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15  16  17  18  19
+  [ 1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1],// 0
+  [ 1,  0,  6,  6,  6,  0,  7,  7,  7,  7,  0,  9,  9,  0,  0,  0,  0,  0,  0,  1],// 1
+  [ 1,  0,  6,  6,  6,  0,  7,  7,  7,  7,  0,  9,  9,  0,  0,  0,  0,  0,  0,  1],// 2
+  [ 1,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  1],// 3
+  [ 1,  0,  2,  2,  0,  3,  3,  0,  4,  4,  0,  5,  5,  0, 12, 12,  0,  0,  0,  1],// 4
+  [ 1,  0,  2,  2,  0,  3,  3,  0,  4,  4,  0,  5,  5,  0, 12, 12,  0,  0,  0,  1],// 5
+  [ 1,  0,  2,  2,  0,  3,  3,  0,  4,  4,  0,  5,  5,  0, 12, 12,  0,  0,  0,  1],// 6
+  [ 1,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  1],// 7 main aisle
+  [ 1,  0,  2,  2,  0,  3,  3,  0,  4,  4,  0,  5,  5,  0, 12, 12,  0,  0,  0,  1],// 8
+  [ 1,  0,  2,  2,  0,  3,  3,  0,  4,  4,  0,  5,  5,  0, 12, 12,  0,  0,  0,  1],// 9
+  [ 1,  0,  2,  2,  0,  3,  3,  0,  4,  4,  0,  5,  5,  0, 12, 12,  0,  0,  0,  1],// 10
+  [ 1,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  1],// 11
+  [ 1,  0,  8,  8,  0,  8,  8,  0,  8,  8,  0,  8,  8,  0,  0,  0,  0,  0,  0,  1],// 12
+  [ 1,  0,  8,  8,  0,  8,  8,  0,  8,  8,  0,  8,  8,  0,  0,  0,  0,  0,  0,  1],// 13
+  [ 1,  0,  0,  0, 10, 10, 10, 10, 10,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  1],// 14
+  [ 1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1],// 15
+];
+
+// Zone tap areas (col range, row range → dept key)
+const ZONES=[
+  {r1:1,r2:2,c1:2,c2:4,dept:'produce',label:'Obst & Gemüse',icon:'🍎'},
+  {r1:1,r2:2,c1:6,c2:9,dept:'meat',label:'Fleisch & Fisch',icon:'🥩'},
+  {r1:1,r2:2,c1:11,c2:12,dept:'bakery',label:'Bäckerei',icon:'🥐'},
+  {r1:4,r2:10,c1:2,c2:3,dept:'drinks',label:'Getränke Gang A',icon:'🍺'},
+  {r1:4,r2:10,c1:5,c2:6,dept:'dairy',label:'Molkerei Gang B',icon:'🥛'},
+  {r1:4,r2:10,c1:8,c2:9,dept:'food',label:'Lebensmittel Gang C',icon:'🍝'},
+  {r1:4,r2:10,c1:11,c2:12,dept:'household',label:'Haushalt Gang D',icon:'🧴'},
+  {r1:4,r2:10,c1:14,c2:15,dept:'freezer',label:'Tiefkühlkost',icon:'❄️'},
+];
+
+const MCOL={0:'#F8F9FB',1:'#D1D5DB',2:'#DCFCE7',3:'#DBEAFE',4:'#FEF3C7',5:'#FAF5FF',6:'#DCFCE7',7:'#FEE2E2',8:'#E0E7FF',9:'#FEF9C3',10:'#CCFBF1',12:'#CFFAFE'};
+const MSTROKE={2:'#16A34A',3:'#2563EB',4:'#D97706',5:'#9333EA',6:'#15803D',7:'#DC2626',8:'#4F46E5',9:'#92400E',10:'#0D9488',12:'#0891B2'};
+
+function initCustMap(){
+  const cv=document.getElementById('custMap');
+  const wrap=cv.parentElement;
+  cv.width=wrap.clientWidth;
+  cv.height=wrap.clientHeight;
+  drawCustMap(cv);
+  // Tap handling
+  cv.onclick=e=>{
+    const r=cv.getBoundingClientRect();
+    const x=e.clientX-r.left, y=e.clientY-r.top;
+    const cs=Math.min(cv.width/MW,cv.height/MH);
+    const ox=(cv.width-MW*cs)/2, oy=(cv.height-MH*cs)/2;
+    const gc=Math.floor((x-ox)/cs), gr=Math.floor((y-oy)/cs);
+    const zone=ZONES.find(z=>gr>=z.r1&&gr<=z.r2&&gc>=z.c1&&gc<=z.c2);
+    if(zone) openDeptModal(zone.dept);
+  };
+}
+
+function drawCustMap(cv){
+  const ctx=cv.getContext('2d');
+  const W=cv.width,H=cv.height;
+  const cs=Math.min((W-4)/MW,(H-4)/MH);
+  const ox=Math.floor((W-MW*cs)/2), oy=Math.floor((H-MH*cs)/2);
+  ctx.fillStyle='#F4F6FA'; ctx.fillRect(0,0,W,H);
+  ctx.save(); ctx.translate(ox,oy);
+
+  for(let r=0;r<MH;r++) for(let c=0;c<MW;c++){
+    const v=MGRID[r][c];
+    const x=c*cs,y=r*cs;
+    ctx.fillStyle=MCOL[v]||'#F8F9FB';
+    ctx.fillRect(x+.5,y+.5,cs-1,cs-1);
+    if(MSTROKE[v]&&v>1){
+      ctx.strokeStyle=MSTROKE[v]; ctx.lineWidth=1.5;
+      ctx.globalAlpha=.7; ctx.strokeRect(x+1,y+1,cs-2,cs-2);
+      ctx.globalAlpha=1;
+      ctx.fillStyle=MSTROKE[v]; ctx.globalAlpha=.2;
+      ctx.fillRect(x+.5,y+.5,cs-1,Math.min(cs*.2,3));
+      ctx.globalAlpha=1;
+      // shelf lines
+      if([2,3,4,5,12].includes(v)&&cs>14){
+        ctx.strokeStyle=MSTROKE[v]; ctx.lineWidth=.5; ctx.globalAlpha=.15;
+        for(let i=1;i<3;i++){ctx.beginPath();ctx.moveTo(x+2,y+i*cs/3);ctx.lineTo(x+cs-2,y+i*cs/3);ctx.stroke();}
+        ctx.globalAlpha=1;
+      }
+      // produce dots
+      if(v===6&&cs>12){
+        const dc=['#15803D','#DC2626','#D97706'];
+        for(let i=0;i<3;i++){ctx.fillStyle=dc[i];ctx.globalAlpha=.6;ctx.beginPath();ctx.arc(x+3+(i%2)*(cs*.4),y+3+Math.floor(i/2)*(cs*.35),Math.max(cs*.08,1.5),0,Math.PI*2);ctx.fill();}
+        ctx.globalAlpha=1;
+      }
+      if(v===10){ctx.fillStyle='rgba(13,148,136,.6)';ctx.font=`${Math.max(cs*.45,8)}px sans-serif`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('▲',x+cs/2,y+cs/2);}
+    }
+    if(v===1){ctx.fillStyle='rgba(0,0,0,.06)';ctx.fillRect(x+.5,y+.5,cs-1,cs-1);}
+  }
+
+  // Labels
+  if(cs>=12){
+    const labels=[
+      {c:2.5,r:1.5,txt:'Obst & Gemüse',col:'#15803D'},{c:7.5,r:1.5,txt:'Fleisch & Fisch',col:'#DC2626'},
+      {c:11.5,r:1.5,txt:'Bäckerei',col:'#92400E'},
+      {c:2.5,r:7,txt:'A',col:'#1D9E75'},{c:5.5,r:7,txt:'B',col:'#2563EB'},
+      {c:8.5,r:7,txt:'C',col:'#D97706'},{c:11.5,r:7,txt:'D',col:'#9333EA'},
+      {c:14.5,r:7,txt:'TK',col:'#0891B2'},
+      {c:7.5,r:12.5,txt:'Kassen',col:'#4F46E5'},
+      {c:6.5,r:14.5,txt:'Eingang / Ausgang',col:'#0D9488'},
+    ];
+    labels.forEach(l=>{
+      const fs=Math.max(Math.min(cs*.38,11),6);
+      ctx.font=`700 ${fs}px DM Sans,sans-serif`;
+      ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.fillStyle=l.col; ctx.globalAlpha=.85;
+      ctx.fillText(l.txt,l.c*cs,l.r*cs);
+      ctx.globalAlpha=1;
+    });
+    // Regal codes
+    const codes=[
+      {c:2.5,r:5,txt:'A1-A5',col:'#1D9E75'},{c:5.5,r:5,txt:'B1-B4',col:'#2563EB'},
+      {c:8.5,r:5,txt:'C1-C7',col:'#D97706'},{c:11.5,r:5,txt:'D1-D5',col:'#9333EA'},
+      {c:14.5,r:5,txt:'TK1-3',col:'#0891B2'},
+      {c:2.5,r:9,txt:'A1-A5',col:'#1D9E75'},{c:5.5,r:9,txt:'B1-B4',col:'#2563EB'},
+      {c:8.5,r:9,txt:'C1-C7',col:'#D97706'},{c:11.5,r:9,txt:'D1-D5',col:'#9333EA'},
+      {c:14.5,r:9,txt:'TK1-3',col:'#0891B2'},
+    ];
+    codes.forEach(l=>{
+      const fs=Math.max(Math.min(cs*.3,8),4);
+      ctx.font=`500 ${fs}px DM Mono,monospace`;
+      ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.fillStyle=l.col; ctx.globalAlpha=.7;
+      ctx.fillText(l.txt,l.c*cs,l.r*cs);
+      ctx.globalAlpha=1;
+    });
+  }
+
+  // Shopping list pins
+  const deptPos={dairy:{c:5.5,r:7},drinks:{c:2.5,r:7},food:{c:8.5,r:7},household:{c:11.5,r:7},produce:{c:3.5,r:2},meat:{c:7.5,r:2},bakery:{c:11.5,r:2},freezer:{c:14.5,r:7}};
+  const listDepts=new Set(shoppingList.filter(i=>!i.done).map(i=>i.dept));
+  listDepts.forEach(dk=>{
+    const pos=deptPos[dk]; if(!pos) return;
+    const px=pos.c*cs, py=pos.r*cs;
+    const cnt=shoppingList.filter(i=>!i.done&&i.dept===dk).length;
+    ctx.strokeStyle='#00A882'; ctx.lineWidth=2; ctx.globalAlpha=.35;
+    ctx.beginPath(); ctx.arc(px,py,cs*.4,0,Math.PI*2); ctx.stroke();
+    ctx.globalAlpha=1; ctx.fillStyle='#00A882';
+    ctx.beginPath(); ctx.arc(px,py,cs*.27,0,Math.PI*2); ctx.fill();
+    ctx.fillStyle='#fff'; ctx.font=`700 ${Math.max(cs*.2,7)}px DM Mono,monospace`;
+    ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText(cnt,px,py);
+  });
+
+  ctx.restore();
+}
+
+// Tap dept → show products
+function openDeptModal(dk){
+  const d=DEPT[dk]; if(!d) return;
+  const prods=PRODUCTS.filter(p=>p.dk===dk);
+  document.getElementById('modalBody').innerHTML=`
+    <div class="mo-handle"></div>
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;">
+      <div style="width:46px;height:46px;border-radius:13px;background:${d.bg};display:flex;align-items:center;justify-content:center;font-size:24px;border:1.5px solid ${d.color}22;">${d.icon}</div>
+      <div><div style="font-size:17px;font-weight:700;color:var(--t1);">${d.name}</div><div style="font-size:12px;color:var(--t2);margin-top:2px;">${prods.length} Artikel · ${findShelfRange(dk)}</div></div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:14px;">
+      ${prods.map(p=>`
+        <div style="background:var(--bg);border:1.5px solid var(--bdr);border-radius:var(--rsm);padding:9px;">
+          <div style="font-size:12px;font-weight:500;color:var(--t1);">${p.n}</div>
+          <div style="font-size:10px;color:var(--t2);margin-top:2px;">Regal ${p.s}</div>
+          <div style="font-size:10px;color:var(--g);font-weight:600;margin-top:5px;cursor:pointer;" onclick="addToList('${p.n}','${p.dk}');closeModal()">+ Zur Liste</div>
+        </div>`).join('')}
+    </div>
+    <button class="mo-close" onclick="closeModal()">Schließen</button>`;
+  document.getElementById('overlay').classList.add('show');
+}
+
+function findShelfRange(dk){
+  const shelves={dairy:'Gang B · B1–B4',drinks:'Gang A · A1–A5',food:'Gang C · C1–C7',household:'Gang D · D1–D5',produce:'Hinterwand links · OG1–OG4',meat:'Hinterwand rechts · FF1–FF2',bakery:'Hinterwand rechts · BK1–BK2',freezer:'Gang TK · TK1–TK3'};
+  return shelves[dk]||'–';
+}
+
+window.addEventListener('resize',()=>{
+  const cv=document.getElementById('custMap');
+  if(cv.width>0) initCustMap();
+  const bv=document.getElementById('bizMap');
+  if(bv.width>0) initBizMap();
+});
+
+// ═══════════════════════════════════════════
+// SEARCH
+// ═══════════════════════════════════════════
+function doSearch(v){
+  const lv=v.trim().toLowerCase();
+  const el=document.getElementById('srList');
+  document.getElementById('srCatLabel').textContent=lv.length>1?'Suchergebnisse':'Alle Abteilungen';
+  if(lv.length<2){el.innerHTML='';return;}
+  const hits=PRODUCTS.filter(p=>p.n.toLowerCase().includes(lv)||DEPT[p.dk]?.name.toLowerCase().includes(lv)).slice(0,10);
+  el.innerHTML=hits.map(p=>`
+    <div class="sr-row">
+      <div class="sr-ico">${p.i}</div>
+      <div class="sr-body"><div class="sr-name">${p.n}</div><div class="sr-dept">${DEPT[p.dk]?.name||p.dk}</div></div>
+      <div class="sr-shelf">Regal ${p.s}</div>
+      <div class="sr-add" onclick="addToList('${p.n}','${p.dk}')">+ Liste</div>
+    </div>`).join('');
+}
+
+function searchEnter(){
+  const v=document.getElementById('bigSearch').value.trim().toLowerCase();
+  const hit=PRODUCTS.find(p=>p.n.toLowerCase().includes(v));
+  if(hit){addToList(hit.n,hit.dk);document.getElementById('bigSearch').value='';document.getElementById('srList').innerHTML='';}
+}
+
+function renderSrCats(){
+  document.getElementById('srCats').innerHTML=Object.entries(DEPT).map(([k,d])=>`
+    <div class="srcat" onclick="setOfferCat('${k}');switchCTab('offers')">
+      <div class="srcat-ico">${d.icon}</div>
+      <div><div class="srcat-name">${d.name}</div><div class="srcat-count">${PRODUCTS.filter(p=>p.dk===k).length} Artikel</div></div>
+    </div>`).join('');
+}
+
+// ═══════════════════════════════════════════
+// SHOPPING LIST
+// ═══════════════════════════════════════════
+function addToList(name,dept){
+  if(!shoppingList.find(i=>i.name===name)) shoppingList.push({name,dept,done:false});
+  updateBadge(); renderListItems(); updateRouteBannerSub();
+  // Refresh map pins
+  const cv=document.getElementById('custMap');
+  if(cv.width>0) drawCustMap(cv);
+  showToast('✓ '+name+' hinzugefügt');
+}
+
+function renderListItems(){
+  const el=document.getElementById('listItems');
+  if(!shoppingList.length){el.innerHTML='<div style="padding:24px 0;text-align:center;color:var(--t3);font-size:13px;">Noch keine Artikel auf der Liste.</div>';return;}
+  el.innerHTML=shoppingList.map((item,i)=>`
+    <div class="li ${item.done?'done':''}">
+      <div class="li-seq${item.done?'':''}">${i+1}</div>
+      <div class="li-cb" onclick="toggleItem(${i})">${item.done?'✓':''}</div>
+      <div class="li-body">
+        <div class="li-name">${item.name}</div>
+        <div class="li-dept">${DEPT[item.dept]?.name||item.dept||''}</div>
+      </div>
+      <div class="li-del" onclick="removeItem(${i})">✕</div>
+    </div>`).join('');
+}
+
+function toggleItem(i){shoppingList[i].done=!shoppingList[i].done;updateBadge();renderListItems();updateRouteBannerSub();const cv=document.getElementById('custMap');if(cv.width>0)drawCustMap(cv);}
+function removeItem(i){shoppingList.splice(i,1);updateBadge();renderListItems();updateRouteBannerSub();const cv=document.getElementById('custMap');if(cv.width>0)drawCustMap(cv);}
+function clearDone(){shoppingList=shoppingList.filter(i=>!i.done);updateBadge();renderListItems();}
+function updateBadge(){document.getElementById('cartBadge').textContent=shoppingList.filter(i=>!i.done).length;}
+function updateRouteBannerSub(){
+  const open=shoppingList.filter(i=>!i.done);
+  document.getElementById('routeBannerSub').textContent=open.length?`${open.length} offene Artikel · optimale Reihenfolge berechnen`:'Alle Artikel erledigt – ab zur Kasse!';
+}
+
+function addListItem(){
+  const inp=document.getElementById('listInp');
+  const v=inp.value.trim();if(!v) return;
+  addToList(v,guessDept(v.toLowerCase()));
+  inp.value='';
+}
+
+// ═══════════════════════════════════════════
+// ROUTE MODAL
+// ═══════════════════════════════════════════
+const DEPT_ORDER=['produce','meat','bakery','drinks','dairy','food','household','freezer'];
+function openRouteModal(){
+  const open=shoppingList.filter(i=>!i.done);
+  if(!open.length){showToast('🛒 Keine offenen Artikel auf der Liste');return;}
+  // Group by dept, sort by dept order
+  const grouped={};
+  open.forEach(item=>{if(!grouped[item.dept])grouped[item.dept]=[];grouped[item.dept].push(item);});
+  const orderedDepts=[...DEPT_ORDER.filter(d=>grouped[d]),
+    ...Object.keys(grouped).filter(d=>!DEPT_ORDER.includes(d))];
+  let stepNum=1;
+  const steps=[{type:'start',ico:'📍',name:'Start: Eingang',shelf:'Erdgeschoss',num:0}];
+  orderedDepts.forEach(dk=>{
+    const d=DEPT[dk];
+    grouped[dk].forEach(item=>{
+      const prod=PRODUCTS.find(p=>p.n===item.name);
+      steps.push({type:'stop',ico:d?.icon||'📦',name:item.name,shelf:(d?.name||dk)+(prod?' · Regal '+prod.s:''),num:stepNum++});
+    });
+  });
+  steps.push({type:'end',ico:'🏁',name:'Kasse',shelf:'Kassenbereich – Ausgang',num:stepNum});
+  const totalM=Math.round(steps.length*4.5);
+
+  document.getElementById('modalBody').innerHTML=`
+    <div class="mo-handle"></div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+      <div style="font-size:17px;font-weight:700;color:var(--t1);">🧭 Optimierte Route</div>
+      <div style="font-size:11px;color:var(--t2);background:var(--bg);padding:4px 10px;border-radius:8px;border:1px solid var(--bdr);">~${totalM}m · ${steps.length-1} Stopps</div>
+    </div>
+    <div class="route-steps">
+      ${steps.map(s=>`
+        <div class="rs ${s.type==='start'?'active':s.type==='end'?'kasse':''}">
+          <div class="rs-num">${s.type==='start'?'▶':s.type==='end'?'🏁':s.num}</div>
+          <div class="rs-ico">${s.ico}</div>
+          <div class="rs-body"><div class="rs-name">${s.name}</div><div class="rs-shelf">${s.shelf}</div></div>
+        </div>`).join('')}
+    </div>
+    <button class="route-start-btn" onclick="startNav()">Navigation starten →</button>
+    <button class="route-close-btn" onclick="closeModal()">Schließen</button>`;
+  document.getElementById('overlay').classList.add('show');
+}
+
+function startNav(){
+  closeModal();
+  switchCTab('map');
+  showToast('🧭 Navigation gestartet – folge den Pins auf der Karte');
+}
+
+// ═══════════════════════════════════════════
+// RECIPES
+// ═══════════════════════════════════════════
+function switchRTab(t,el){
+  curRTab=t;
+  document.querySelectorAll('.rtab').forEach(x=>x.classList.toggle('on',x.dataset.rt===t));
+  document.querySelectorAll('.rpanel').forEach(x=>x.classList.toggle('on',x.id==='rp-'+t));
+  if(t==='internet') renderInternetRecipes();
+  else if(t==='community') renderCommunityRecipes();
+  else if(t==='mine') renderMyRecipes();
+  else if(t==='publish') renderPublishForm();
+}
+
+function recipeCard(r,type){
+  const bgMap={internet:'#FEF3C7',community:'#EFF6FF',mine:'#F0FDF4'};
+  return`<div class="recipe-card" onclick="showRecipeDetail('${r.id}','${type}')">
+    <div class="rc-hero" style="background:${r.bg||bgMap[type]||'#F4F6FA'}">${r.icon}
+      <div class="rc-author">👤 ${r.author}</div>
+      <div class="rc-rating">⭐ ${r.rating}</div>
+    </div>
+    <div class="rc-body">
+      <div class="rc-title">${r.title}</div>
+      <div class="rc-meta">
+        <div class="rc-tag">⏱ ${r.time}</div>
+        <div class="rc-tag">👥 ${r.servings} Pers.</div>
+        <div class="rc-tag">🔥 ${r.kcal} kcal</div>
+      </div>
+      <div style="display:flex;gap:4px;margin-top:6px;flex-wrap:wrap;">
+        ${(r.tags||[]).map(t=>`<span style="font-size:10px;background:var(--bg);border:1px solid var(--bdr);color:var(--t2);padding:2px 7px;border-radius:8px;">${t}</span>`).join('')}
+      </div>
+      <div class="rc-footer">
+        <div class="rc-ingr">${r.ingr.length} Zutaten</div>
+        <div class="rc-add" onclick="event.stopPropagation();addRecipeToList('${r.id}','${type}')">+ Zur Liste</div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function renderInternetRecipes(){
+  document.getElementById('rp-internet').innerHTML=
+    `<div style="padding:0 16px 8px;font-size:12px;color:var(--t2);">Beliebte Rezepte aus dem Internet</div>`+
+    INTERNET_RECIPES.map(r=>recipeCard(r,'internet')).join('');
+}
+
+function renderCommunityRecipes(){
+  document.getElementById('rp-community').innerHTML=
+    `<div style="padding:0 16px 8px;font-size:12px;color:var(--t2);">Von anderen Nutzern veröffentlichte Rezepte</div>`+
+    communityRecipes.map(r=>recipeCard(r,'community')).join('');
+}
+
+function renderMyRecipes(){
+  const el=document.getElementById('rp-mine');
+  if(!myRecipes.length){
+    el.innerHTML=`<div style="text-align:center;padding:28px 0;color:var(--t3);font-size:13px;">Du hast noch keine eigenen Rezepte.<br><br>
+      <div style="display:inline-block;background:var(--gbg);color:var(--g);border:1.5px solid var(--gbdr);border-radius:10px;padding:8px 18px;font-size:13px;font-weight:600;cursor:pointer;" onclick="switchRTab('publish',document.querySelector('[data-rt=publish]'))">Erstes Rezept veröffentlichen →</div></div>`;
+    return;
+  }
+  el.innerHTML=`<div style="padding:0 0 8px;font-size:12px;color:var(--t2);">Meine veröffentlichten Rezepte</div>`+
+    myRecipes.map(r=>recipeCard(r,'mine')).join('');
+}
+
+function renderPublishForm(){
+  document.getElementById('rp-publish').innerHTML=`
+    <div class="pub-form">
+      <div class="pf-title">🍽️ Eigenes Rezept veröffentlichen</div>
+      <input class="pf-inp" id="pf-title" placeholder="Rezeptname z.B. Omas Apfelkuchen">
+      <div class="pf-row">
+        <select class="pf-sel" id="pf-cat">
+          <option>Pasta & Reis</option><option>Fleisch & Fisch</option><option>Vegetarisch</option>
+          <option>Backen & Süßes</option><option>Suppen & Eintöpfe</option><option>Salate</option><option>Frühstück</option>
+        </select>
+        <input class="pf-inp" id="pf-time" placeholder="Dauer z.B. 30 min" style="flex:.8;">
+      </div>
+      <div class="pf-row">
+        <input class="pf-inp" id="pf-serv" placeholder="Portionen" type="number" min="1" style="flex:.6;">
+        <input class="pf-inp" id="pf-kcal" placeholder="Kalorien kcal" type="number" style="flex:.6;">
+      </div>
+      <textarea class="pf-ta" id="pf-ingr" placeholder="Zutaten (eine pro Zeile):\nButter 250g\nVollmilch 3,8%\nSpaghetti 500g\n..."></textarea>
+      <textarea class="pf-ta" id="pf-steps" placeholder="Zubereitung (kurze Beschreibung)..."></textarea>
+      <button class="pf-submit" onclick="publishRecipe()">Rezept für alle veröffentlichen →</button>
+    </div>`;
+}
+
+function showRecipeDetail(id,type){
+  const all=[...INTERNET_RECIPES,...communityRecipes,...myRecipes];
+  const r=all.find(x=>x.id===id);if(!r) return;
+  const d=DEPT;
+  document.getElementById('modalBody').innerHTML=`
+    <div class="mo-handle"></div>
+    <div style="font-size:18px;font-weight:700;color:var(--t1);margin-bottom:4px;">${r.icon} ${r.title}</div>
+    <div style="font-size:12px;color:var(--t2);margin-bottom:14px;">⏱ ${r.time} · 👥 ${r.servings} Portionen · 🔥 ${r.kcal} kcal · ⭐ ${r.rating}</div>
+    <div style="font-size:13px;font-weight:600;color:var(--t1);margin-bottom:8px;">Zutaten (${r.ingr.length}):</div>
+    <div style="display:flex;flex-direction:column;gap:5px;margin-bottom:14px;">
+      ${r.ingr.map(ing=>{
+        const prod=PRODUCTS.find(p=>p.n.toLowerCase().includes(ing.toLowerCase())||ing.toLowerCase().includes(p.n.split(' ')[0].toLowerCase()));
+        const onList=shoppingList.find(i=>i.name===(prod?prod.n:ing));
+        return`<div style="display:flex;align-items:center;gap:8px;padding:7px 10px;background:var(--bg);border-radius:8px;border:1px solid var(--bdr);">
+          <div style="font-size:16px;">${prod?d[prod.dk]?.icon||'📦':'🛒'}</div>
+          <div style="flex:1;font-size:13px;">${prod?prod.n:ing}</div>
+          <div style="font-size:10px;color:${onList?'var(--g)':'var(--t3)'};">${onList?'✓ Auf Liste':prod?'Regal '+prod.s:''}</div>
+        </div>`;
+      }).join('')}
+    </div>
+    <button class="route-start-btn" onclick="addRecipeToList('${r.id}','${type}');closeModal()">Alle Zutaten zur Liste hinzufügen →</button>
+    <button class="mo-close" onclick="closeModal()">Schließen</button>`;
+  document.getElementById('overlay').classList.add('show');
+}
+
+function addRecipeToList(id,type){
+  const all=[...INTERNET_RECIPES,...communityRecipes,...myRecipes];
+  const r=all.find(x=>x.id===id);if(!r) return;
+  let added=0;
+  r.ingr.forEach(ing=>{
+    const prod=PRODUCTS.find(p=>p.n.toLowerCase().includes(ing.toLowerCase())||ing.toLowerCase().includes(p.n.split(' ')[0].toLowerCase()));
+    const name=prod?prod.n:ing;
+    const dk=prod?prod.dk:guessDept(ing.toLowerCase());
+    if(!shoppingList.find(i=>i.name===name)){shoppingList.push({name,dept:dk,done:false});added++;}
+  });
+  updateBadge();renderListItems();updateRouteBannerSub();
+  const cv=document.getElementById('custMap');if(cv.width>0)drawCustMap(cv);
+  showToast(`🍽️ ${r.title}: ${added} Zutaten hinzugefügt`);
+}
+
+function publishRecipe(){
+  const title=document.getElementById('pf-title')?.value.trim();
+  const ingrsRaw=document.getElementById('pf-ingr')?.value.trim();
+  if(!title||!ingrsRaw){showToast('⚠️ Bitte Titel und Zutaten ausfüllen');return;}
+  const ingr=ingrsRaw.split('\n').map(s=>s.trim()).filter(Boolean);
+  const newR={
+    id:'my'+Date.now(),title,time:document.getElementById('pf-time')?.value||'–',
+    servings:parseInt(document.getElementById('pf-serv')?.value)||4,
+    kcal:parseInt(document.getElementById('pf-kcal')?.value)||0,
+    rating:'–',icon:'🍳',bg:'#F0FDF4',author:'Du',ingr,tags:[document.getElementById('pf-cat')?.value||'Sonstiges'],
+    published:true
+  };
+  myRecipes.push(newR);
+  communityRecipes.unshift({...newR,author:'Neu veröffentlicht'});
+  switchRTab('mine',document.querySelector('[data-rt="mine"]'));
+  showToast('✓ Rezept veröffentlicht!');
+}
+
+// Recipe import (file/text)
+function openImportModal(){
+  document.getElementById('modalBody').innerHTML=`
+    <div class="mo-handle"></div>
+    <div class="mo-title">📄 Rezept importieren</div>
+    <div class="drop-zone" id="dz" onclick="document.getElementById('fileInput').click()"
+      ondragover="event.preventDefault();this.classList.add('over')"
+      ondragleave="this.classList.remove('over')"
+      ondrop="onDrop(event)">
+      <div class="dz-ico">📄</div>
+      <div class="dz-title">Datei hochladen</div>
+      <div class="dz-sub">.txt, .pdf, Foto – Klicken oder hineinziehen</div>
+    </div>
+    <div class="or-divider">— oder Text einfügen —</div>
+    <textarea class="mo-ta" id="recTxt" placeholder="z.B.: Spaghetti Bolognese:\n500g Hackfleisch, Spaghetti, Zwiebeln, Tomatenmark..."></textarea>
+    <button class="import-btn" onclick="doImport()">Zutaten importieren →</button>
+    <button class="mo-close" onclick="closeModal()">Abbrechen</button>`;
+  document.getElementById('overlay').classList.add('show');
+}
+
+function onDrop(e){e.preventDefault();document.getElementById('dz').classList.remove('over');const f=e.dataTransfer.files[0];if(f)readF(f);}
+function onFileChange(inp){if(inp.files[0])readF(inp.files[0]);}
+function readF(f){
+  const r=new FileReader();
+  r.onload=e=>{const ta=document.getElementById('recTxt');if(ta)ta.value=e.target.result.slice(0,2000);};
+  if(f.type.startsWith('image/'))showToast('Foto erkannt – bitte Text manuell einfügen');
+  else r.readAsText(f,'UTF-8');
+}
+function onDrop(e){e.preventDefault();document.getElementById('dz')?.classList.remove('over');if(e.dataTransfer.files[0])readF(e.dataTransfer.files[0]);}
+
+const RMAP={'hackfleisch':'Rinderhackfleisch','spaghetti':'Spaghetti 500g','nudeln':'Penne rigate','pasta':'Penne rigate','zwiebeln':'Zwiebeln 1kg','tomatenmark':'Tomatenmark','sahne':'Sahne 30%','käse':'Gouda jung','mozzarella':'Mozzarella','tomaten':'Tomaten Roma','paprika':'Paprika rot','karotten':'Karotten 1kg','spinat':'Babyspinat','hähnchen':'Hähnchenbrustfilet','lachs':'Lachsfilet','butter':'Butter 250g','milch':'Vollmilch 3,8%','mehl':'Weizenmehl 405','zucker':'Zucker weiß 1kg','olivenöl':'Olivenöl','ketchup':'Ketchup Heinz','reis':'Basmati Reis 1kg','joghurt':'Joghurt natur','quark':'Quark mager','bananen':'Bananen Bio','äpfel':'Äpfel Pink Lady','gurke':'Gurke','zwiebel':'Zwiebeln 1kg'};
+
+function doImport(){
+  const txt=document.getElementById('recTxt')?.value.toLowerCase()||'';
+  let added=0;
+  for(const[k,v] of Object.entries(RMAP)){
+    if(txt.includes(k)&&!shoppingList.find(i=>i.name===v)){
+      shoppingList.push({name:v,dept:guessDept(k),done:false});added++;
+    }
+  }
+  closeModal();updateBadge();renderListItems();updateRouteBannerSub();
+  const cv=document.getElementById('custMap');if(cv.width>0)drawCustMap(cv);
+  showToast(added?`🍽️ ${added} Zutaten importiert`:'Keine Zutaten erkannt');
+}
+
+function renderRecipes(){switchRTab('internet',document.querySelector('[data-rt="internet"]'));}
+
+// ═══════════════════════════════════════════
+// BUSINESS
+// ═══════════════════════════════════════════
+let bizOffers=[...OFFERS];
+let bizProds=[...PRODUCTS];
+
+function openBusiness(){
+  showScreen('bizApp');
+  animStats();
+  renderBizOffers();renderBizProds();renderShelfTable();
+  setTimeout(initBizMap,100);
+}
+
+function switchBTab(t,el){
+  document.querySelectorAll('.btab').forEach(x=>x.classList.remove('on'));
+  if(el) el.classList.add('on');
+  document.querySelectorAll('.bpanel').forEach(x=>x.classList.toggle('on',x.id==='bp-'+t));
+  if(t==='bmap') setTimeout(initBizMap,60);
+}
+
+function animStats(){
+  [[sv1,247],[sv2,89]].forEach(([id,t])=>{
+    let c=0;const s=()=>{c=Math.min(c+Math.ceil(t/25),t);document.getElementById(id).textContent=c;if(c<t)requestAnimationFrame(s);};
+    requestAnimationFrame(s);
+  });
+}
+const sv1='sv1',sv2='sv2';
+
+function renderBizOffers(){
+  document.getElementById('bizOfferList').innerHTML=bizOffers.map((o,i)=>{
+    const save=o.old>0?Math.round((1-o.nw/o.old)*100):0;
+    return`<div class="bo-row">
+      <div class="bo-ico">${o.icon||DEPT[o.dept]?.icon||'📦'}</div>
+      <div class="bo-body"><div class="bo-name">${o.name}</div><div class="bo-meta">${DEPT[o.dept]?.name||o.dept} · ${o.shelf||'–'} · bis ${o.valid||'–'}</div></div>
+      <div class="bo-price">${(o.nw||0).toFixed(2)} € <span style="font-size:10px;color:var(--rd);">−${save}%</span></div>
+      <div class="bo-btns"><div class="bo-edit" onclick="editBO(${i})">Edit</div><div class="bo-del" onclick="delBO(${i})">✕</div></div>
+    </div>`;
+  }).join('');
+  document.getElementById('sv3').textContent=bizOffers.length;
+}
+
+function addBizOffer(){
+  const name=document.getElementById('bo-name').value.trim();
+  if(!name){showToast('⚠️ Bitte Produktname eingeben');return;}
+  const cat=document.getElementById('bo-cat').value;
+  const old=parseFloat(document.getElementById('bo-old').value)||0;
+  const nw=parseFloat(document.getElementById('bo-new').value)||0;
+  const shelf=document.getElementById('bo-shelf').value.trim();
+  const o={id:Date.now(),name,dept:cat,icon:DEPT[cat]?.icon||'📦',old,nw,shelf,valid:'Sa 05.04.'};
+  bizOffers.unshift(o);OFFERS.unshift(o);
+  ['bo-name','bo-old','bo-new','bo-shelf'].forEach(id=>document.getElementById(id).value='');
+  renderBizOffers();renderOffers();showToast('✓ Angebot veröffentlicht');
+}
+
+function delBO(i){bizOffers.splice(i,1);renderBizOffers();renderOffers();}
+function editBO(i){const o=bizOffers[i];document.getElementById('bo-name').value=o.name;document.getElementById('bo-old').value=o.old;document.getElementById('bo-new').value=o.nw;document.getElementById('bo-shelf').value=o.shelf||'';document.getElementById('bo-cat').value=o.dept;delBO(i);showToast('Zum Bearbeiten geladen');}
+
+function exportCSV(){
+  const csv=['Name,Kategorie,Regal,Normal,Angebot,Bis',...bizOffers.map(o=>`"${o.name}","${DEPT[o.dept]?.name||o.dept}","${o.shelf||''}",${o.old||0},${o.nw||0},"${o.valid||''}"`)].join('\n');
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download='angebote.csv';a.click();showToast('📄 CSV exportiert');
+}
+
+function renderBizProds(){
+  document.getElementById('bizProdList').innerHTML=bizProds.slice(0,30).map(p=>`
+    <div class="prod-row"><div class="pr-ico">${p.i}</div><div class="pr-name">${p.n}</div><div class="pr-shelf">Regal ${p.s}</div></div>`).join('');
+}
+
+function addBizProd(){
+  const name=document.getElementById('bp-name').value.trim();
+  if(!name){showToast('⚠️ Bitte Produktname');return;}
+  const cat=document.getElementById('bp-cat').value;
+  const shelf=document.getElementById('bp-shelf').value.trim();
+  bizProds.unshift({n:name,dk:cat,s:shelf||'?',i:DEPT[cat]?.icon||'📦'});
+  PRODUCTS.unshift({n:name,dk:cat,s:shelf||'?',i:DEPT[cat]?.icon||'📦'});
+  ['bp-name','bp-shelf'].forEach(id=>document.getElementById(id).value='');
+  renderBizProds();showToast('✓ Produkt gespeichert');
+}
+
+function renderShelfTable(){
+  const rows=[
+    {zone:'Gang A',code:'A1–A5',dept:'Getränke',col:'#1D9E75'},
+    {zone:'Gang B',code:'B1–B4',dept:'Molkerei & Käse',col:'#2563EB'},
+    {zone:'Gang C',code:'C1–C7',dept:'Grundnahrungsmittel',col:'#D97706'},
+    {zone:'Gang D',code:'D1–D5',dept:'Haushalt & Pflege',col:'#9333EA'},
+    {zone:'Gang TK',code:'TK1–TK3',dept:'Tiefkühlkost',col:'#0891B2'},
+    {zone:'Hinterwand links',code:'OG1–OG4',dept:'Obst & Gemüse',col:'#16A34A'},
+    {zone:'Hinterwand rechts',code:'FF1–FF2',dept:'Fleisch & Fisch',col:'#DC2626'},
+    {zone:'Rechte Seite',code:'BK1–BK2',dept:'Bäckerei',col:'#92400E'},
+  ];
+  document.getElementById('shelfTable').innerHTML=rows.map(r=>`
+    <div style="display:flex;align-items:center;gap:10px;padding:9px 12px;border-bottom:1px solid var(--bdr);">
+      <div style="width:8px;height:8px;border-radius:50%;background:${r.col};flex-shrink:0;"></div>
+      <div style="flex:1;font-size:13px;font-weight:500;color:var(--t1);">${r.zone}</div>
+      <div style="font-size:11px;font-family:var(--mono);color:${r.col};font-weight:600;background:${r.col}15;padding:2px 7px;border-radius:6px;">${r.code}</div>
+      <div style="font-size:11px;color:var(--t2);">${r.dept}</div>
+    </div>`).join('');
+}
+
+function initBizMap(){
+  const cv=document.getElementById('bizMap');
+  const wrap=cv.parentElement;
+  cv.width=wrap.clientWidth; cv.height=wrap.clientHeight;
+  drawCustMap(cv);
+}
+
+// ═══════════════════════════════════════════
+// UTILS
+// ═══════════════════════════════════════════
+function closeModal(){document.getElementById('overlay').classList.remove('show');}
+
+function showToast(msg){
+  const t=document.getElementById('toast');
+  const el=document.createElement('div');el.className='ti';el.innerHTML=msg;
+  t.appendChild(el);setTimeout(()=>el.remove(),3000);
+}
+
+function guessDept(v){
+  if(['wasser','saft','bier','wein','cola','limo','energy','eistee','drink'].some(k=>v.includes(k)))return'drinks';
+  if(['milch','butter','käse','joghurt','sahne','quark','mozzarella','skyr','frischkäse','kefir','molke'].some(k=>v.includes(k)))return'dairy';
+  if(['nudel','pasta','spaghetti','penne','reis','mehl','zucker','schoko','lindt','cornflakes','hafer','ketchup','tomatenmark','olivenöl','öl'].some(k=>v.includes(k)))return'food';
+  if(['spülmittel','waschmittel','shampoo','zahnpasta','küchenpapier','müllbeutel','duschmittel','seife'].some(k=>v.includes(k)))return'household';
+  if(['apfel','äpfel','banane','tomate','gurke','karotte','spinat','paprika','zwiebel','obst','gemüse','salat'].some(k=>v.includes(k)))return'produce';
+  if(['fleisch','hähnchen','lachs','fisch','garnelen','hackfleisch','steak','wurst','schwein'].some(k=>v.includes(k)))return'meat';
+  if(['brot','brötchen','baguette','croissant','brezel'].some(k=>v.includes(k)))return'bakery';
+  if(['pizza','tiefkühl','tk','pommes','erbsen','eis'].some(k=>v.includes(k)))return'freezer';
+  return'food';
+}
+
+// Voice
+let voiceR=null;
+function startVoice(){
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR){showToast('⚠️ Bitte Chrome oder Safari nutzen');return;}
+  document.getElementById('voiceOv').classList.add('show');
+  voiceR=new SR();voiceR.lang='de-DE';voiceR.continuous=false;voiceR.interimResults=false;
+  voiceR.onresult=e=>{
+    const t=e.results[0][0].transcript;
+    document.getElementById('voiceTxt').textContent='Erkannt: "'+t+'"';
+    setTimeout(()=>{stopVoice();document.getElementById('bigSearch').value=t;doSearch(t);},700);
+  };
+  voiceR.onerror=()=>{stopVoice();showToast('Spracherkennung fehlgeschlagen');};
+  voiceR.start();
+}
+function stopVoice(){if(voiceR)voiceR.stop();document.getElementById('voiceOv').classList.remove('show');document.getElementById('voiceTxt').textContent='Spreche jetzt... z.B. "Butter und Milch"';}
+
+// Init
+renderStores();
+</script>
+</body>
+</html>
