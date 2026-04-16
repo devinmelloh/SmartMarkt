@@ -1,0 +1,10 @@
+{
+  "name": "codex",
+  "version": "0.1.0",
+  "description": "Wrapper um die OpenAI Codex CLI – Slash-Commands und Subagent, um Codex aus Claude Code heraus zu nutzen.",
+  "author": {
+    "name": "SmartMarkt Team"
+  },
+  "keywords": ["codex", "openai", "cli", "wrapper", "second-opinion"],
+  "license": "UNLICENSED"
+}
